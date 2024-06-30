@@ -1,0 +1,2 @@
+!forbiddenword
+SIGNOFF
