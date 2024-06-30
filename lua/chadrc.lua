@@ -9,49 +9,34 @@ local stbufnr = function()
 end
 
 
-local default_sep_icons = {
-  default = { left = "", right = "" },
-  round = { left = "", right = "" },
-  block = { left = "█", right = "█" },
-  arrow = { left = "", right = "" },
-}
-
 local separators = { left = "", right = "" }
 
-local sep_l = separators["left"]
-local sep_r = separators["right"]
+local function get_relative_path()
+  local full_path = vim.fn.expand('%:p')
+  local cwd = vim.fn.getcwd()
+  return vim.fn.fnamemodify(full_path, ':.' .. cwd .. ':~:.')
+end
 
-
-local short_name = function()
-    -- Get the current buffer's file path
-    local full_path = vim.fn.expand('%:p')
-
-    -- Split the path into components
+local function getPathComponentsFromEnd(path, num)
     local components = {}
-    for component in string.gmatch(full_path, '[^/]+') do
+    for component in string.gmatch(path, "[^/]+") do
         table.insert(components, component)
     end
 
-    -- Get the last 3 components (or fewer if there aren't 3)
-    local last_3 = {}
-    for i = math.max(1, #components - 2), #components do
-        table.insert(last_3, components[i])
+    local result = "/"
+    for i = math.max(1, #components - num + 1), #components do
+        result = result .. components[i] .. "/"
     end
 
-
-    -- Add folder icon to last 2 components (if they exist)
-    local folder_icon = " " -- You can change this to any icon you prefer
-    if #last_3 >= 2 then
-        last_3[#last_3 - 1] = folder_icon .. last_3[#last_3 - 1]
-    end
-    if #last_3 >= 3 then
-        last_3[#last_3 - 2] = folder_icon .. last_3[#last_3 - 2]
+    -- Remove the trailing slash if it's a file
+    if components[#components]:find("%.") then
+        result = result:sub(1, -2)
     end
 
-    -- Join the last 3 components
-    local result = table.concat(last_3, ' > ')
     return result
 end
+
+local sep_r = separators["right"]
 
 M.ui = {
     theme = "onedark",
@@ -74,8 +59,9 @@ M.ui = {
             -- The default cursor module is override
             file = function()
                 local icon = "󰈚"
-                local path = vim.api.nvim_buf_get_name(stbufnr())
-                local name = short_name()
+                local path= get_relative_path()
+                local name = path
+
                 -- local name = (path == "" and "Empty ") or path:match "([^/\\]+)[/\\]*$"
 
                 if name ~= "Empty " then
@@ -87,16 +73,13 @@ M.ui = {
                     end
                 end
 
-                local new_name = name:gsub("([^>]+)$", " "..icon .. "%1")
-                local x = { icon, new_name}
-                local final_name= " " .. x[2] .. " "
+                local new_name = name:gsub("([^/]+)$", " ".. icon .. " %1")
+                local final_name= " " .. new_name .. " "
                 return "%#St_file# " .. final_name.. "%#St_file_sep#" .. sep_r
             end,
             lsp_msg = function()
+                -- to enable fidget to work
                 require('lsp-status').status()
-                -- Get the current buffer's file path
-                -- local file_name = short_name()
-                -- return file_name
             end,
             cursor = function()
                 local sep_l = ""
