@@ -79,59 +79,59 @@ lspconfig.rust_analyzer.setup {
 
 -- typescript
 --disable formatimg on attach for tsserver
--- local on_attach_tsserver = function(client, bufnr)
---   client.server_capabilities.documentFormattingProvider = false
---   client.server_capabilities.documentRangeFormattingProvider = false
---   on_attach(client, bufnr)
--- end
+local on_attach_tsserver = function(client, bufnr)
+  client.server_capabilities.documentFormattingProvider = false
+  client.server_capabilities.documentRangeFormattingProvider = false
+  on_attach(client, bufnr)
+end
 
--- lspconfig.tsserver.setup {
---   on_attach = on_attach,
---   -- on_attach = on_attach_tsserver,
---   on_init = on_init,
---   capabilities = capabilities,
---   init_options = {
---     -- maxTsServerMemory = 12288,
---     preferences = {
---       disableSuggestions = false,
---     },
---   },
---   commands = {
---     OrganizeImports = {
---       organise_imports,
---       description = "Organize Imports",
---     },
---     AddMissingImports = {
---       add_missing_import,
---       description = "Add missing imports",
---     },
---   },
---   settings = {
---     importModuleSpecifierPreference = "non-relative",
---     javascript = {
---       inlayHints = {
---         -- includeInlayEnumMemberValueHints = true,
---         -- includeInlayFunctionLikeReturnTypeHints = true,
---         -- includeInlayFunctionParameterTypeHints = true,
---         includeInlayParameterNameHints = "all",
---         -- includeInlayParameterNameHintsWhenArgumentMatchesName = true,
---         -- includeInlayPropertyDeclarationTypeHints = true,
---         -- includeInlayVariableTypeHints = true,
---       },
---     },
---     typescript = {
---       inlayHints = {
---         -- includeInlayEnumMemberValueHints = true,
---         -- includeInlayFunctionLikeReturnTypeHints = true,
---         -- includeInlayFunctionParameterTypeHints = true,
---         includeInlayParameterNameHints = "all",
---         -- includeInlayParameterNameHintsWhenArgumentMatchesName = true,
---         -- includeInlayPropertyDeclarationTypeHints = true,
---         -- includeInlayVariableTypeHints = true,
---       },
---     },
---   },
--- }
+lspconfig.ts_ls.setup {
+  -- on_attach = on_attach,
+  on_attach = on_attach_tsserver,
+  on_init = on_init,
+  capabilities = capabilities,
+  init_options = {
+    -- maxTsServerMemory = 12288,
+    preferences = {
+      disableSuggestions = false,
+    },
+  },
+  commands = {
+    OrganizeImports = {
+      organise_imports,
+      description = "Organize Imports",
+    },
+    AddMissingImports = {
+      add_missing_import,
+      description = "Add missing imports",
+    },
+  },
+  settings = {
+    importModuleSpecifierPreference = "non-relative",
+    javascript = {
+      inlayHints = {
+        -- includeInlayEnumMemberValueHints = true,
+        -- includeInlayFunctionLikeReturnTypeHints = true,
+        -- includeInlayFunctionParameterTypeHints = true,
+        includeInlayParameterNameHints = "all",
+        -- includeInlayParameterNameHintsWhenArgumentMatchesName = true,
+        -- includeInlayPropertyDeclarationTypeHints = true,
+        -- includeInlayVariableTypeHints = true,
+      },
+    },
+    typescript = {
+      inlayHints = {
+        -- includeInlayEnumMemberValueHints = true,
+        -- includeInlayFunctionLikeReturnTypeHints = true,
+        -- includeInlayFunctionParameterTypeHints = true,
+        includeInlayParameterNameHints = "all",
+        -- includeInlayParameterNameHintsWhenArgumentMatchesName = true,
+        -- includeInlayPropertyDeclarationTypeHints = true,
+        -- includeInlayVariableTypeHints = true,
+      },
+    },
+  },
+}
 
 lspconfig.lua_ls.setup {
   on_attach = on_attach,
@@ -150,8 +150,8 @@ lspconfig.emmet_ls.setup {
     "html",
     "css",
     "scss",
-    "javascriptreact",
-    "typescriptreact",
+    -- "javascriptreact",
+    -- "typescriptreact",
     "vue",
     "svelte",
     "markdown",

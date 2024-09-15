@@ -29,24 +29,24 @@ return {
     opts = {},
   },
   -- {
-  --     "supermaven-inc/supermaven-nvim",
-  --     event = "InsertEnter",
-  --     config = function()
-  --         require("supermaven-nvim").setup {
-  --             keymaps = {
-  --                 accept_suggestion = "<M-l>",
-  --                 clear_suggestion = "<C-]>",
-  --                 accept_word = "<C-j>",
-  --             },
-  --             ignore_filetypes = { cpp = true },
-  --             color = {
-  --                 suggestion_color = "#ffffff",
-  --                 cterm = 244,
-  --             },
-  --             disable_inline_completion = false, -- disables inline completion for use with cmp
-  --             disable_keymaps = false, -- disables built in keymaps for more manual control
-  --         }
-  --     end,
+  --   "supermaven-inc/supermaven-nvim",
+  --   event = "InsertEnter",
+  --   config = function()
+  --     require("supermaven-nvim").setup {
+  --       keymaps = {
+  --         accept_suggestion = "<M-l>",
+  --         clear_suggestion = "<C-]>",
+  --         accept_word = "<C-j>",
+  --       },
+  --       ignore_filetypes = { cpp = true },
+  --       color = {
+  --         suggestion_color = "#ffffff",
+  --         cterm = 244,
+  --       },
+  --       disable_inline_completion = false, -- disables inline completion for use with cmp
+  --       disable_keymaps = false, -- disables built in keymaps for more manual control
+  --     }
+  --   end,
   -- },
   {
     "kevinhwang91/nvim-hlslens",
@@ -195,7 +195,7 @@ return {
           -- Config for conflicted files in diff views during a merge or rebase.
           layout = "diff3_mixed",
           disable_diagnostics = false, -- Temporarily disable diagnostics for conflict buffers while in the view.
-          winbar_info = true,          -- See ':h diffview-config-view.x.winbar_info'
+          winbar_info = true, -- See ':h diffview-config-view.x.winbar_info'
         },
         file_history = {
           -- Config for changed files in file history views.
@@ -215,24 +215,18 @@ return {
     dependencies = { "nvim-lua/plenary.nvim" },
     opts = { signs = false },
   },
-  {
-    "pmizio/typescript-tools.nvim",
-    event = "BufReadPre",
-    dependencies = {
-      "nvim-lua/plenary.nvim",
-      "neovim/nvim-lspconfig",
-      -- { "j-hui/fidget.nvim", opts = {}, event = "LspAttach" },
-    },
-    opts = {
-      jsx_close_tag = {
-        enable = false,
-        filetypes = { "javascriptreact", "typescriptreact" },
-      },
-    },
-    config = function()
-      require "configs.typescript-tools"
-    end,
-  },
+  -- {
+  --   "pmizio/typescript-tools.nvim",
+  --   event = "BufReadPre",
+  --   dependencies = {
+  --     "nvim-lua/plenary.nvim",
+  --     "neovim/nvim-lspconfig",
+  --   },
+  --   opts = {},
+  --   config = function()
+  --     require "configs.typescript-tools"
+  --   end,
+  -- },
   {
     "axelvc/template-string.nvim",
     event = "VeryLazy",
@@ -353,25 +347,25 @@ return {
   {
     -- autotag rename
     "windwp/nvim-ts-autotag",
-    event = 'VeryLazy',
+    event = "VeryLazy",
     config = function()
-      require('nvim-ts-autotag').setup({
+      require("nvim-ts-autotag").setup {
         opts = {
           -- Defaults
-          enable_close = true,          -- Auto close tags
-          enable_rename = true,         -- Auto rename pairs of tags
-          enable_close_on_slash = false -- Auto close on trailing </
+          enable_close = true, -- Auto close tags
+          enable_rename = true, -- Auto rename pairs of tags
+          enable_close_on_slash = false, -- Auto close on trailing </
         },
         -- Also override individual filetype configs, these take priority.
         -- Empty by default, useful if one of the "opts" global settings
         -- doesn't work well in a specific filetype
         per_filetype = {
           ["html"] = {
-            enable_close = true
-          }
-        }
-      })
-    end
+            enable_close = true,
+          },
+        },
+      }
+    end,
   },
   -- {
   --     "David-Kunz/gen.nvim",
@@ -440,7 +434,7 @@ return {
     event = "BufRead",
     dependencies = {
       { "zbirenbaum/copilot.lua" }, -- or github/copilot.vim
-      { "nvim-lua/plenary.nvim" },  -- for curl, log wrapper
+      { "nvim-lua/plenary.nvim" }, -- for curl, log wrapper
     },
     opts = {
       debug = false, -- Enable debugging
@@ -505,17 +499,18 @@ return {
 
   {
     "williamboman/mason.nvim",
-    opts = {
-      ensure_installed = {
-        "lua-language-server",
-        "stylua",
-        "html-lsp",
-        "css-lsp",
-        "prettier",
-        "typescript-language-server",
-        "graphql",
-      },
-    },
+    -- deprecated
+    -- opts = {
+    --   ensure_installed = {
+    --     "lua-language-server",
+    --     "stylua",
+    --     "html-lsp",
+    --     "css-lsp",
+    --     "prettier",
+    --     "typescript-language-server",
+    --     "graphql",
+    --   },
+    -- },
   },
   {
     "nvim-treesitter/playground",
@@ -569,7 +564,7 @@ return {
           },
           selection_modes = {
             ["@parameter.outer"] = "v", -- charwise
-            ["@function.outer"] = "V",  -- linewise
+            ["@function.outer"] = "V", -- linewise
             ["@class.outer"] = "<c-v>", -- blockwise
           },
 

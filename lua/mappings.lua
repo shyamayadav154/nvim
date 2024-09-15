@@ -3,6 +3,7 @@ require "nvchad.mappings"
 vim.keymap.set({ "n", "x", "o" }, "s", "<Plug>(leap-forward)")
 vim.keymap.set({ "n", "x", "o" }, "S", "<Plug>(leap-backward)")
 
+
 require('hlslens').setup()
 
 local kopts = {noremap = true, silent = true}
@@ -14,6 +15,10 @@ local nomap = vim.keymap.del
 nomap("n", "<leader>n") -- relative line number toggle disabled
 nomap("n", "<leader>b") -- git sign blame disabled
 -- if has keymap at leader gb then remap
+
+-- terminal keymaps remove
+nomap("n","<leader>h")
+nomap("n","<M-i>")
 
 
 -- delete console from current page
@@ -103,7 +108,9 @@ map("n", "[e", diagnostic_goto(false, "ERROR"), { desc = "Prev Error" })
 map("n", "]w", diagnostic_goto(true, "WARN"), { desc = "Next Warning" })
 map("n", "[w", diagnostic_goto(false, "WARN"), { desc = "Prev Warning" })
 
-map("n", "<leader>p", '"_dP', { desc = "Paste without losing" })
+-- in select mode paste without losing
+map("v", "<leader>p", '"_dP', { desc = "Paste without losing" })
+-- map("n", "<leader>p", '"_dP', { desc = "Paste without losing" })
 map("i", "<A-n>", "<CMD>lua require('luasnip').jump(1)<CR>", { desc = "Jump onestep", silent = true })
 map("i", "<A-p>", "<CMD>lua require('luasnip').jump(-1)<CR>", { desc = "Jump onestep", silent = true })
 map("i", "<A-e>", "<CMD>lua require('luasnip').expand_or_jump()<CR>", { desc = "Jump onestep", silent = true })
@@ -139,6 +146,7 @@ map(
 )
 map("n", "<leader>gf", "<CMD>Telescop git_status<CR>", { desc = "git status" })
 map("n", "<leader>fr", "<CMD>Telescope lsp_references<CR>", { desc = "lsp references" })
+map("n", "<leader>fs", "<CMD>Telescope grep_string<CR>", { desc = "findt string under cursor" })
 map("n", "<leader>ws", "<CMD>Telescope lsp_dynamic_workspace_symbols<CR>", { desc = "lsp dynamic workspace symbol" })
 map("n", "<leader>b", "<cmd>Telescope git_branches<CR>", { desc = "Git Branches" })
 map("n", "<leader>tb", "<CMD>Telescope builtin<CR>", { desc = "Telescope builtins" })
@@ -192,7 +200,7 @@ map(
     ":%s/\\<<C-r><C-w>\\>/<C-r><C-w>/gI<Left><Left><Left>",
     { desc = "replace word under cursor in current file" }
 )
-map("n", "<leader>p", '"+p', { desc = "Paste from system clipboard" })
+-- map("n", "<leader>p", '"+p', { desc = "Paste from system clipboard" })
 map("n", "<leader>co", ":%bd|e#<CR>", { desc = "close other buffers" })
 map("n", "<C-h>", "<cmd> TmuxNavigateLeft<CR>", { desc = "window left" })
 map("n", "<C-l>", "<cmd> TmuxNavigateRight<CR>", { desc = "window right" })
@@ -248,7 +256,7 @@ map("n", "<leader>hp", "<CMD> lua require('harpoon.ui').nav_prev()<CR>", { desc 
 -- Visual mode keymaps
 map("v", "J", ":m '>+1<CR>gv=gv", { desc = "Move line down" })
 map("v", "K", ":m '<-2<CR>gv=gv", { desc = "Move line up" })
-map("v", "<leader>p", '"+p', { desc = "Paste from system clipboard" })
+-- map("v", "<leader>p", '"+p', { desc = "Paste from system clipboard" })
 map("v", "<A-k>", "<cmd>VisualDuplicate -1<CR>", { desc = "Duplicate line down" })
 map("v", "<A-j>", "<cmd>VisualDuplicate +1<CR>", { desc = "Duplicate line up" })
 -- map("v", "<leader>rp", ":s/\\v(\\w+),/\\1={\\1}/g<CR>", { desc = "replace prop input into component props" })

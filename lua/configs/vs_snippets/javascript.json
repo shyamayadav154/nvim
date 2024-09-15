@@ -1,4 +1,14 @@
 {
+  "box center":{
+    "prefix": "dirac",
+    "body":["direction='row' align='center'"],
+    "description": "box center"
+  },
+  "box center justify":{
+    "prefix": "dirajb",
+    "body":["direction='row' align='center' justify='between'"],
+    "description": "box center between"
+  },
   "Range Function": {
     "prefix": "range",
     "body": [
@@ -79,9 +89,9 @@
   "resolver graphql": {
     "prefix": "resfn",
     "body": [
-      "/** @param {{ prisma: Prisma}} context */",
+      "/** @param {{ prisma: Prisma, user_session:import('types/next-auth').User  }} context */",
       "export async function $1(parent, args, context, info){",
-      "const select = getSelection(info, info.fieldNodes[0].selectionSet)",
+      "const include = common_utils.getInclusion(info, info.fieldNodes[0].selectionSet)",
       "  $2",
       "}"
     ]
@@ -223,7 +233,7 @@
     ],
     "description": "Log output to console"
   },
-  "prisma typedef": {
+  "prisma type": {
     "prefix": "ptype",
     "body": [
       "/** @typedef { import('@prisma_internals/company').PrismaClient } Prisma */"
@@ -240,7 +250,7 @@
   "prisma context": {
     "prefix": "pctx",
     "body": [
-      "/** @param {{ prisma: Prisma}} context */"
+      "/** @param {{ prisma: Prisma, user_session:import('types/next-auth').User  }} context */"
     ],
     "description": "Prisma typedef"
   },
