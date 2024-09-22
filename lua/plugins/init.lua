@@ -1,7 +1,6 @@
 return {
   "NvChad/nvcommunity",
   { import = "nvcommunity.tools.telescope-fzf-native" },
-  { import = "nvcommunity.git.neogit" },
   { import = "nvcommunity.git.lazygit" },
   { import = "nvcommunity.motion.harpoon" },
   { import = "nvcommunity.editor.treesj" },
@@ -13,41 +12,102 @@ return {
     opts = { max_join_length = 160 },
   },
   {
-    "nvim-lua/lsp-status.nvim",
+    "aaronhallaert/advanced-git-search.nvim",
+    cmd = { "AdvancedGitSearch" },
+    config = function()
+      -- optional: setup telescope before loading the extension
+      require("telescope").setup {
+        -- move this to the place where you call the telescope setup function
+        extensions = {
+          advanced_git_search = {
+            -- See Config
+          },
+        },
+      }
+
+      require("telescope").load_extension "advanced_git_search"
+    end,
+    dependencies = {
+      --- See dependencies
+    },
+  },
+  {
+    "debugloop/telescope-undo.nvim",
+    dependencies = { -- note how they're inverted to above example
+      {
+        "nvim-telescope/telescope.nvim",
+        dependencies = { "nvim-lua/plenary.nvim" },
+      },
+    },
+    keys = {
+      { -- lazy style key map
+        "<leader>tu",
+        "<cmd>Telescope undo<cr>",
+        desc = "undo history",
+      },
+    },
+    opts = {
+      -- don't use `defaults = { }` here, do this in the main telescope spec
+      extensions = {
+        use_delta = true,
+        use_custom_command = nil, -- setting this implies `use_delta = false`. Accepted format is: { "bash", "-c", "echo '$DIFF' | delta" }
+        side_by_side = false,
+        vim_diff_opts = { ctxlen = vim.o.scrolloff },
+        entry_format = "state #$ID, $STAT, $TIME",
+        undo = {
+          --
+        },
+      },
+      config = function(_, opts)
+        -- Calling telescope's setup from multiple specs does not hurt, it will happily merge the
+        -- configs for us. We won't use data, as everything is in it's own namespace (telescope
+        -- defaults, as well as each extension).
+        require("telescope").setup(opts)
+        require("telescope").load_extension "undo"
+      end,
+    },
   },
   -- {
-  --   'Bekaboo/dropbar.nvim',
-  --   event = 'VeryLazy',
-  --   -- optional, but required for fuzzy finder support
-  --   dependencies = {
-  --     'nvim-telescope/telescope-fzf-native.nvim'
-  --   }
+  --   "nvim-lua/lsp-status.nvim",
   -- },
   {
     "j-hui/fidget.nvim",
     event = "LspAttach",
+    dependencies = {
+      "nvim-lua/lsp-status.nvim",
+    },
     opts = {},
   },
   -- {
-  --   "supermaven-inc/supermaven-nvim",
-  --   event = "InsertEnter",
-  --   config = function()
-  --     require("supermaven-nvim").setup {
-  --       keymaps = {
-  --         accept_suggestion = "<M-l>",
-  --         clear_suggestion = "<C-]>",
-  --         accept_word = "<C-j>",
-  --       },
-  --       ignore_filetypes = { cpp = true },
-  --       color = {
-  --         suggestion_color = "#ffffff",
-  --         cterm = 244,
-  --       },
-  --       disable_inline_completion = false, -- disables inline completion for use with cmp
-  --       disable_keymaps = false, -- disables built in keymaps for more manual control
-  --     }
+  --   "typed-rocks/ts-worksheet-neovim",
+  --   cmd = "Tsw",
+  --   opts = {
+  --     severity = vim.diagnostic.severity.WARN,
+  --   },
+  --   config = function(_, opts)
+  --     require("tsw").setup(opts)
   --   end,
   -- },
+  {
+    "supermaven-inc/supermaven-nvim",
+    event = "InsertEnter",
+    config = function()
+      require("supermaven-nvim").setup {
+        keymaps = {
+          accept_suggestion = "<M-l>",
+          clear_suggestion = "<C-]>",
+          accept_word = "<M-j>",
+        },
+        ignore_filetypes = { cpp = true },
+        color = {
+          suggestion_color = "#ffffff",
+          cterm = 244,
+        },
+        disable_inline_completion = false, -- disables inline completion for use with cmp
+        disable_keymaps = false, -- disables built in keymaps for more manual control
+      }
+    end,
+  },
   {
     "kevinhwang91/nvim-hlslens",
     event = "VeryLazy",
@@ -180,6 +240,18 @@ return {
     opt = {},
   },
   {
+    "NeogitOrg/neogit",
+    cmd = "Neogit",
+    dependencies = {
+      "nvim-lua/plenary.nvim", -- required
+      "sindrets/diffview.nvim", -- optional - Diff integration
+
+      -- Only one of these is needed.
+      "nvim-telescope/telescope.nvim", -- optional
+    },
+    config = true,
+  },
+  {
     "sindrets/diffview.nvim",
     event = "BufRead",
     cmd = "DiffviewOpen",
@@ -300,19 +372,53 @@ return {
   -- },
   {
     "nvim-telescope/telescope.nvim",
-    opts = {
-      defaults = {
-        mappings = {
-          i = { ["<c-enter>"] = "to_fuzzy_refine" },
-        },
-      },
-    },
+    -- dependencies = {
+    --   {
+    --     "nvim-telescope/telescope-live-grep-args.nvim",
+    --     -- This will not install any breaking changes.
+    --     -- For major updates, this must be adjusted manually.
+    --     version = "^1.0.0",
+    --   },
+    -- },
+    -- -- opts = function()
+    --   local conf = require "nvchad.configs.telescope"
+    --   local actions = require "telescope.actions"
+    --   local telescope = require "telescope" -- no need
+    --
+    --   telescope.load_extension "live_grep_args"
+    --
+    --   conf.defaults.mappings.n = {
+    --     ["<C-Enter"] = actions.to_fuzzy_refine,
+    --     ["q"] = actions.close,
+    --     ["<C-w>"] = actions.send_selected_to_qflist + actions.open_qflist,
+    --   }
+    --
+    --   conf.defaults.mappings.i = {
+    --     ["<c-enter"] = actions.to_fuzzy_refine,
+    --     ["<C-j>"] = actions.cycle_history_next,
+    --     ["<C-k>"] = actions.cycle_history_prev,
+    --     ["<C-w>"] = actions.send_selected_to_qflist + actions.open_qflist,
+    --   }
+    --   return conf
+    -- end,
+    -- opts = {
+    --   defaults = {
+    --     mappings = {
+    --       i = {
+    --         ["<c-enter>"] = "to_fuzzy_refine",
+    --         ["<c-j>"] = "cycle_history_next",
+    --         ["<c-k>"] = "cycle_history_prev",
+    --         ["<c-w>"] = { "send_selected_to_qflist", "open_qflist" },
+    --       },
+    --     },
+    --   },
+    -- },
   },
   -- { import = "nvcommunity.motion.neoscroll" },
-  {
-    "christoomey/vim-tmux-navigator",
-    lazy = false,
-  },
+  -- {
+  --   "christoomey/vim-tmux-navigator",
+  --   lazy = false,
+  -- },
   {
     "f-person/git-blame.nvim",
     cmd = {
@@ -428,42 +534,42 @@ return {
       { "[[", desc = "Prev Reference" },
     },
   },
-  {
-    "CopilotC-Nvim/CopilotChat.nvim",
-    branch = "canary",
-    event = "BufRead",
-    dependencies = {
-      { "zbirenbaum/copilot.lua" }, -- or github/copilot.vim
-      { "nvim-lua/plenary.nvim" }, -- for curl, log wrapper
-    },
-    opts = {
-      debug = false, -- Enable debugging
-      -- See Configuration section for rest
-    },
-    -- See Commands section for default commands if you want to lazy load on them
-  },
-  {
-    "zbirenbaum/copilot.lua",
-    cmd = "Copilot",
-    event = "InsertEnter",
-    opts = {
-      filetypes = {
-        yaml = true,
-        markdown = true,
-        help = false,
-        gitcommit = false,
-        gitrebase = false,
-        hgcommit = false,
-        svn = false,
-        cvs = false,
-        ["."] = false,
-      },
-      suggestion = {
-        auto_trigger = true,
-        debounce = 0,
-      },
-    },
-  },
+  -- {
+  --   "CopilotC-Nvim/CopilotChat.nvim",
+  --   branch = "canary",
+  --   event = "BufRead",
+  --   dependencies = {
+  --     { "zbirenbaum/copilot.lua" }, -- or github/copilot.vim
+  --     { "nvim-lua/plenary.nvim" }, -- for curl, log wrapper
+  --   },
+  --   opts = {
+  --     debug = false, -- Enable debugging
+  --     -- See Configuration section for rest
+  --   },
+  --   -- See Commands section for default commands if you want to lazy load on them
+  -- },
+  -- {
+  --   "zbirenbaum/copilot.lua",
+  --   cmd = "Copilot",
+  --   event = "InsertEnter",
+  --   opts = {
+  --     filetypes = {
+  --       yaml = true,
+  --       markdown = true,
+  --       help = false,
+  --       gitcommit = false,
+  --       gitrebase = false,
+  --       hgcommit = false,
+  --       svn = false,
+  --       cvs = false,
+  --       ["."] = false,
+  --     },
+  --     suggestion = {
+  --       auto_trigger = true,
+  --       debounce = 0,
+  --     },
+  --   },
+  -- },
   {
     -- indent guess prisma mainly
     "NMAC427/guess-indent.nvim",

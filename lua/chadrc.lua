@@ -17,24 +17,6 @@ local function get_relative_path()
   return vim.fn.fnamemodify(full_path, ':.' .. cwd .. ':~:.')
 end
 
-local function getPathComponentsFromEnd(path, num)
-    local components = {}
-    for component in string.gmatch(path, "[^/]+") do
-        table.insert(components, component)
-    end
-
-    local result = "/"
-    for i = math.max(1, #components - num + 1), #components do
-        result = result .. components[i] .. "/"
-    end
-
-    -- Remove the trailing slash if it's a file
-    if components[#components]:find("%.") then
-        result = result:sub(1, -2)
-    end
-
-    return result
-end
 
 local sep_r = separators["right"]
 
@@ -56,7 +38,6 @@ M.ui = {
         theme = "default",
         separator_style = "round",
         modules = {
-            -- The default cursor module is override
             file = function()
                 local icon = "󰈚"
                 local path= get_relative_path()
@@ -81,6 +62,7 @@ M.ui = {
                 -- to enable fidget to work
                 require('lsp-status').status()
             end,
+            -- The default cursor module is override
             cursor = function()
                 local sep_l = ""
                 local text = "%2l:%-2v %2L "

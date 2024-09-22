@@ -1,5 +1,5 @@
 -- EXAMPLE
-local configs = require("nvchad.configs.lspconfig")
+local configs = require "nvchad.configs.lspconfig"
 local on_attach = configs.on_attach
 local on_init = configs.on_init
 local capabilities = configs.capabilities
@@ -29,7 +29,7 @@ local servers = {
   -- "tsserver",
   "cssls",
   "graphql",
-  "quick_lint_js",
+  -- "quick_lint_js",
   "jsonls",
   "eslint",
   "prismals",
@@ -56,13 +56,17 @@ for _, lsp in ipairs(servers) do
   }
 end
 
-
 local util = require "lspconfig/util"
 
 lspconfig.tailwindcss.setup {
   on_attach = on_attach,
   capabilities = capabilities,
-  root_dir = util.root_pattern("tailwind.config.js", "tailwind.config.ts", "tailwind.config.mjs", "tailwind.config.cjs" ),
+  root_dir = util.root_pattern(
+    "tailwind.config.js",
+    "tailwind.config.ts",
+    "tailwind.config.mjs",
+    "tailwind.config.cjs"
+  ),
 }
 
 lspconfig.rust_analyzer.setup {
@@ -80,6 +84,12 @@ lspconfig.rust_analyzer.setup {
 -- typescript
 --disable formatimg on attach for tsserver
 local on_attach_tsserver = function(client, bufnr)
+  if client.server_capabilities.codeLensProvider then
+    vim.api.nvim_create_autocmd({ "BufEnter", "CursorHold", "InsertLeave" }, {
+      buffer = bufnr,
+      callback = vim.lsp.codelens.refresh,
+    })
+  end
   client.server_capabilities.documentFormattingProvider = false
   client.server_capabilities.documentRangeFormattingProvider = false
   on_attach(client, bufnr)
@@ -94,6 +104,10 @@ lspconfig.ts_ls.setup {
     -- maxTsServerMemory = 12288,
     preferences = {
       disableSuggestions = false,
+      codeLens = {
+        references = true,
+        implementations = true,
+      },
     },
   },
   commands = {
@@ -108,7 +122,12 @@ lspconfig.ts_ls.setup {
   },
   settings = {
     importModuleSpecifierPreference = "non-relative",
+    -- enable code lens
     javascript = {
+      codeLens = {
+        references = true,
+        implementations = true,
+      },
       inlayHints = {
         -- includeInlayEnumMemberValueHints = true,
         -- includeInlayFunctionLikeReturnTypeHints = true,
@@ -120,6 +139,10 @@ lspconfig.ts_ls.setup {
       },
     },
     typescript = {
+      codeLens = {
+        references = true,
+        implementations = true,
+      },
       inlayHints = {
         -- includeInlayEnumMemberValueHints = true,
         -- includeInlayFunctionLikeReturnTypeHints = true,

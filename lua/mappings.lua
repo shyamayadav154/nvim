@@ -1,25 +1,40 @@
 require "nvchad.mappings"
 
+local map = vim.keymap.set
+local nomap = vim.keymap.del
+
 vim.keymap.set({ "n", "x", "o" }, "s", "<Plug>(leap-forward)")
 vim.keymap.set({ "n", "x", "o" }, "S", "<Plug>(leap-backward)")
 
+local builtin = require "telescope.builtin"
+local actions = require "telescope.actions"
 
-require('hlslens').setup()
+-- Custom function to grep through git status files
+function LiveGrepGitStatus()
+  local git_files = vim.fn.systemlist "git status --porcelain | awk '{print $2}'"
+  -- print
+  print(git_files)
+  builtin.live_grep {
+    search_dirs = git_files,
+    prompt_title = "Live Grep on Git Status",
+  }
+end
 
-local kopts = {noremap = true, silent = true}
+map("n", "<leader>gw", LiveGrepGitStatus, { desc = "Live Grep on Git Status" })
 
-vim.keymap.set('n', '<Leader>l', '<Cmd>noh<CR>', kopts)
+require("hlslens").setup()
 
-local map = vim.keymap.set
-local nomap = vim.keymap.del
+local kopts = { noremap = true, silent = true }
+
+vim.keymap.set("n", "<Leader>l", "<Cmd>noh<CR>", kopts)
+
 nomap("n", "<leader>n") -- relative line number toggle disabled
 nomap("n", "<leader>b") -- git sign blame disabled
 -- if has keymap at leader gb then remap
 
 -- terminal keymaps remove
-nomap("n","<leader>h")
-nomap("n","<M-i>")
-
+nomap("n", "<leader>h")
+nomap("n", "<M-i>")
 
 -- delete console from current page
 map("n", "<leader>cd", "<cmd>g/console/norm dd<CR>", { desc = "Delete console from current file/buffer" })
@@ -27,22 +42,20 @@ map("n", "<leader>cd", "<cmd>g/console/norm dd<CR>", { desc = "Delete console fr
 map("n", "<leader>lf", "<cmd>lua vim.diagnostic.open_float()<cr>", { desc = "Delete console from current file/buffer" })
 
 map("n", "<leader>cl", function()
-     local word = vim.fn.expand("<cword>") -- Get the word under the cursor
-    local wrapped_word = "\tconsole.log({" .. word .. "})" -- Wrap the word with brackets
-    local cursor_pos = vim.fn.getcurpos() -- Get the current cursor position
-    -- add the wrapped word to the new next line
-    vim.fn.append(cursor_pos[2], wrapped_word)
-end
-, { desc = "Generate console for word under cursor" })
+  local word = vim.fn.expand "<cword>" -- Get the word under the cursor
+  local wrapped_word = "\tconsole.log({" .. word .. "})" -- Wrap the word with brackets
+  local cursor_pos = vim.fn.getcurpos() -- Get the current cursor position
+  -- add the wrapped word to the new next line
+  vim.fn.append(cursor_pos[2], wrapped_word)
+end, { desc = "Generate console for word under cursor" })
 
 map("n", "<leader>cdi", function()
-     local word = vim.fn.expand("<cword>") -- Get the word under the cursor
-    local wrapped_word = "\tconsole.dir(" .. word .. ",{ depth: Infinity })" -- Wrap the word with brackets
-    local cursor_pos = vim.fn.getcurpos() -- Get the current cursor position
-    -- add the wrapped word to the new next line
-    vim.fn.append(cursor_pos[2], wrapped_word)
-end
-, { desc = "Generate console for word under cursor" })
+  local word = vim.fn.expand "<cword>" -- Get the word under the cursor
+  local wrapped_word = "\tconsole.dir(" .. word .. ",{ depth: Infinity })" -- Wrap the word with brackets
+  local cursor_pos = vim.fn.getcurpos() -- Get the current cursor position
+  -- add the wrapped word to the new next line
+  vim.fn.append(cursor_pos[2], wrapped_word)
+end, { desc = "Generate console for word under cursor" })
 
 -- diffview
 map("n", "<leader>do", "<cmd>DiffviewOpen<CR>", { desc = "Open DiffView" })
@@ -56,24 +69,24 @@ map("n", "<Esc>", "<cmd>nohlsearch<CR>", { nowait = true, silent = true, desc = 
 -- map("n", "<leader>n", ":ASToggle<CR>", {desc = "Toggle autosave"})
 
 map("n", "<leader>S", '<cmd>lua require("spectre").toggle()<CR>', {
-    desc = "Toggle Spectre",
+  desc = "Toggle Spectre",
 })
 
 map("n", "<leader>cco", function()
-    local input = vim.fn.input "Quick Chat: "
-    if input ~= "" then
-        require("CopilotChat").ask(input, { selection = require("CopilotChat.select").buffer })
-    end
+  local input = vim.fn.input "Quick Chat: "
+  if input ~= "" then
+    require("CopilotChat").ask(input, { selection = require("CopilotChat.select").buffer })
+  end
 end, { desc = "Quick Chat" })
 
 map("n", "<leader>tch", function()
-    local actions = require "CopilotChat.actions"
-    require("CopilotChat.integrations.telescope").pick(actions.help_actions())
+  local actions = require "CopilotChat.actions"
+  require("CopilotChat.integrations.telescope").pick(actions.help_actions())
 end, { desc = "Copilot help action" })
 
 map("n", "<leader>tcp", function()
-    local actions = require "CopilotChat.actions"
-    require("CopilotChat.integrations.telescope").pick(actions.prompt_actions())
+  local actions = require "CopilotChat.actions"
+  require("CopilotChat.integrations.telescope").pick(actions.prompt_actions())
 end, { desc = "Copilot prompt action" })
 
 -- another text
@@ -94,11 +107,11 @@ end, { desc = "Copilot prompt action" })
 
 -- diagnostic go to
 local diagnostic_goto = function(next, severity)
-    local go = next and vim.diagnostic.goto_next or vim.diagnostic.goto_prev
-    severity = severity and vim.diagnostic.severity[severity] or nil
-    return function()
-        go { severity = severity }
-    end
+  local go = next and vim.diagnostic.goto_next or vim.diagnostic.goto_prev
+  severity = severity and vim.diagnostic.severity[severity] or nil
+  return function()
+    go { severity = severity }
+  end
 end
 
 map("n", "]d", diagnostic_goto(true), { desc = "Next Diagnostic" })
@@ -134,15 +147,15 @@ map("n", "<leader>gr", "<CMD>Gitsigns reset_buffer<CR>", { desc = "Git reset cur
 map("n", "<leader>gs", "<CMD>Gitsigns stage_hunk<CR>", { desc = "Git reset current file" })
 
 map("n", "<leader>ih", function()
-    vim.lsp.inlay_hint.enable(not vim.lsp.inlay_hint.is_enabled())
+  vim.lsp.inlay_hint.enable(not vim.lsp.inlay_hint.is_enabled())
 end, { desc = "Toggle inlay hints", silent = true })
 
 -- Telescope searches
 map(
-    "n",
-    "<leader>ff",
-    "<CMD>Telescope find_files hidden=true find_command=rg,--files,--hidden,--glob,!.git <CR>",
-    { desc = "Find Files hidden too" }
+  "n",
+  "<leader>ff",
+  "<CMD>Telescope find_files hidden=true find_command=rg,--files,--hidden,--glob,!.git <CR>",
+  { desc = "Find Files hidden too" }
 )
 map("n", "<leader>gf", "<CMD>Telescop git_status<CR>", { desc = "git status" })
 map("n", "<leader>fr", "<CMD>Telescope lsp_references<CR>", { desc = "lsp references" })
@@ -154,10 +167,10 @@ map("n", "<leader>tr", "<CMD>Telescope resume<CR>", { desc = "Telescope builtins
 
 map("n", "gl", "<cmd>b#<CR>", { desc = "Go to last buffer" })
 map(
-    "n",
-    "<leader>rq",
-    "^ds[dWarefetch:<Esc>p/use<CR>dwiuseQuery<Esc>",
-    { desc = "Replaces useLazyQuery with useQuery", remap = true, silent = true }
+  "n",
+  "<leader>rq",
+  "^ds[dWarefetch:<Esc>p/use<CR>dwiuseQuery<Esc>",
+  { desc = "Replaces useLazyQuery with useQuery", remap = true, silent = true }
 )
 
 -- go to mapping
@@ -195,17 +208,17 @@ map("n", "<leader>qc", "<cmd>cclose<CR>", { desc = "open quickfix" })
 
 -- replace
 map(
-    "n",
-    "<leader>s",
-    ":%s/\\<<C-r><C-w>\\>/<C-r><C-w>/gI<Left><Left><Left>",
-    { desc = "replace word under cursor in current file" }
+  "n",
+  "<leader>s",
+  ":%s/\\<<C-r><C-w>\\>/<C-r><C-w>/gI<Left><Left><Left>",
+  { desc = "replace word under cursor in current file" }
 )
 -- map("n", "<leader>p", '"+p', { desc = "Paste from system clipboard" })
 map("n", "<leader>co", ":%bd|e#<CR>", { desc = "close other buffers" })
-map("n", "<C-h>", "<cmd> TmuxNavigateLeft<CR>", { desc = "window left" })
-map("n", "<C-l>", "<cmd> TmuxNavigateRight<CR>", { desc = "window right" })
-map("n", "<C-j>", "<cmd> TmuxNavigateDown<CR>", { desc = "window down" })
-map("n", "<C-k>", "<cmd> TmuxNavigateUp<CR>", { desc = "window up" })
+-- map("n", "<C-h>", "<cmd> TmuxNavigateLeft<CR>", { desc = "window left" })
+-- map("n", "<C-l>", "<cmd> TmuxNavigateRight<CR>", { desc = "window right" })
+-- map("n", "<C-j>", "<cmd> TmuxNavigateDown<CR>", { desc = "window down" })
+-- map("n", "<C-k>", "<cmd> TmuxNavigateUp<CR>", { desc = "window up" })
 map("n", "<C-d>", "<C-d>zz", { desc = "Jump hanlf page down with cursor in th middle" })
 map("n", "<C-u>", "<C-u>zz", { desc = "Jump hanlf page down with cursor in th middle" })
 map("n", "J", "mzJ`z", { desc = "dont move cursor on j press" })
@@ -215,40 +228,40 @@ map("n", "<A-t>", ":lua require('nvterm.terminal').toggle 'horizontal'<CR>", { d
 
 -- Harpoon keymaps
 map(
-    "n",
-    "<leader>a",
-    "<CMD> lua require('harpoon.mark').add_file()<CR>",
-    { desc = "Add file to harpoon menu", silent = true }
+  "n",
+  "<leader>a",
+  "<CMD> lua require('harpoon.mark').add_file()<CR>",
+  { desc = "Add file to harpoon menu", silent = true }
 )
 map(
-    "n",
-    "<leader>ho",
-    "<CMD> lua require('harpoon.ui').toggle_quick_menu()<CR>",
-    { desc = "harpoon open menu", silent = true }
+  "n",
+  "<leader>ho",
+  "<CMD> lua require('harpoon.ui').toggle_quick_menu()<CR>",
+  { desc = "harpoon open menu", silent = true }
 )
 map(
-    "n",
-    "<leader>1",
-    "<CMD> lua require('harpoon.ui').nav_file(1)<CR>",
-    { desc = "Navigate to file 1 in harpoon", silent = true }
+  "n",
+  "<leader>1",
+  "<CMD> lua require('harpoon.ui').nav_file(1)<CR>",
+  { desc = "Navigate to file 1 in harpoon", silent = true }
 )
 map(
-    "n",
-    "<leader>2",
-    "<CMD> lua require('harpoon.ui').nav_file(2)<CR>",
-    { desc = "Navigate to file 2 in harpoon", silent = true }
+  "n",
+  "<leader>2",
+  "<CMD> lua require('harpoon.ui').nav_file(2)<CR>",
+  { desc = "Navigate to file 2 in harpoon", silent = true }
 )
 map(
-    "n",
-    "<leader>3",
-    "<CMD> lua require('harpoon.ui').nav_file(3)<CR>",
-    { desc = "Navigate to file 3 in harpoon", silent = true }
+  "n",
+  "<leader>3",
+  "<CMD> lua require('harpoon.ui').nav_file(3)<CR>",
+  { desc = "Navigate to file 3 in harpoon", silent = true }
 )
 map(
-    "n",
-    "<leader>4",
-    "<CMD> lua require('harpoon.ui').nav_file(4)<CR>",
-    { desc = "Navigate to file 4 in harpoon", silent = true }
+  "n",
+  "<leader>4",
+  "<CMD> lua require('harpoon.ui').nav_file(4)<CR>",
+  { desc = "Navigate to file 4 in harpoon", silent = true }
 )
 map("n", "<leader>hn", "<CMD> lua require('harpoon.ui').nav_next()<CR>", { desc = "Navigate to next mark in harpoon" })
 map("n", "<leader>hp", "<CMD> lua require('harpoon.ui').nav_prev()<CR>", { desc = "Navigate to prev mark in harpoon" })
@@ -264,18 +277,17 @@ map("v", "<A-j>", "<cmd>VisualDuplicate +1<CR>", { desc = "Duplicate line up" })
 -- Terminal mode keymaps
 map("t", ";", ":", { desc = "enter command mode", nowait = true })
 map(
-    "t",
-    "<A-t>",
-    "<C-\\><C-n>:lua require('nvterm.terminal').toggle 'horizontal'<CR>",
-    { desc = "Terminal toggle horizontal" }
+  "t",
+  "<A-t>",
+  "<C-\\><C-n>:lua require('nvterm.terminal').toggle 'horizontal'<CR>",
+  { desc = "Terminal toggle horizontal" }
 )
 
-vim.keymap.set('n', 'n', [[<Cmd>execute('normal! ' . v:count1 . 'n')<CR><Cmd>lua require('hlslens').start()<CR>]])
-vim.keymap.set('n', 'N', [[<Cmd>execute('normal! ' . v:count1 . 'N')<CR><Cmd>lua require('hlslens').start()<CR>]])
-vim.keymap.set('n', '*', [[*<Cmd>lua require('hlslens').start()<CR>]], kopts)
-vim.keymap.set('n', '#', [[#<Cmd>lua require('hlslens').start()<CR>]], kopts)
-vim.keymap.set('n', 'g*', [[g*<Cmd>lua require('hlslens').start()<CR>]], kopts)
-vim.keymap.set('n', 'g#', [[g#<Cmd>lua require('hlslens').start()<CR>]], kopts)
-
+vim.keymap.set("n", "n", [[<Cmd>execute('normal! ' . v:count1 . 'n')<CR><Cmd>lua require('hlslens').start()<CR>]])
+vim.keymap.set("n", "N", [[<Cmd>execute('normal! ' . v:count1 . 'N')<CR><Cmd>lua require('hlslens').start()<CR>]])
+vim.keymap.set("n", "*", [[*<Cmd>lua require('hlslens').start()<CR>]], kopts)
+vim.keymap.set("n", "#", [[#<Cmd>lua require('hlslens').start()<CR>]], kopts)
+vim.keymap.set("n", "g*", [[g*<Cmd>lua require('hlslens').start()<CR>]], kopts)
+vim.keymap.set("n", "g#", [[g#<Cmd>lua require('hlslens').start()<CR>]], kopts)
 
 -- map({ "n", "i", "v" }, "<C-s>", "<cmd> w <cr>")
