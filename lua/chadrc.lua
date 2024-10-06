@@ -24,7 +24,7 @@ M.ui = {
     theme = "onedark",
 
     tabufline = {
-        lazyload = true,
+        lazyload = false,
         overriden_modules = nil,
     },
 

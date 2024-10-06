@@ -207,7 +207,12 @@ vim.g.lua_snippets_path = "~/.config/nvim/lua/configs/lua_snippets"
 vim.opt.filetype = "on"
 
 vim.o.cursorlineopt = "both"
--- vim.cmd('hi IlluminatedWordText guibg=none gui=underline')
--- vim.cmd('hi IlluminatedWordRead guibg=none gui=underline')
--- vim.cmd('hi IlluminatedWordWrite guibg=none gui=underline')
--- vim.highlight.priorities.semantic_tokens = 195 -- Or any number lower than 100, treesitter's priority level
+-- views can only be fully collapsed with the global statusline
+vim.opt.laststatus = 3
+
+
+-- nvim ufo
+-- vim.o.foldcolumn = '1' -- '0' is not bad
+vim.o.foldlevel = 99 -- Using ufo provider need a large value, feel free to decrease the value
+vim.o.foldlevelstart = 99
+vim.o.foldenable = true

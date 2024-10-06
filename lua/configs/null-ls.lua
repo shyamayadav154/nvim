@@ -47,8 +47,8 @@ local sources = {
     b.code_actions.refactoring,
 
     --codespell
-    b.diagnostics.codespell,
-    b.formatting.codespell,
+    -- b.diagnostics.codespell,
+    -- b.formatting.codespell,
 
     -- b.completion.spell,
     -- b.completion.tags,

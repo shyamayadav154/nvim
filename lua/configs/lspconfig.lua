@@ -29,11 +29,11 @@ local servers = {
   -- "tsserver",
   "cssls",
   "graphql",
-  -- "quick_lint_js",
+  "quick_lint_js",
   "jsonls",
   "eslint",
   "prismals",
-  "grammarly",
+  -- "grammarly",
   "bashls",
   "clangd",
   "dockerls",
@@ -58,16 +58,16 @@ end
 
 local util = require "lspconfig/util"
 
-lspconfig.tailwindcss.setup {
-  on_attach = on_attach,
-  capabilities = capabilities,
-  root_dir = util.root_pattern(
-    "tailwind.config.js",
-    "tailwind.config.ts",
-    "tailwind.config.mjs",
-    "tailwind.config.cjs"
-  ),
-}
+-- lspconfig.tailwindcss.setup {
+--   on_attach = on_attach,
+--   capabilities = capabilities,
+--   root_dir = util.root_pattern(
+--     "tailwind.config.js",
+--     "tailwind.config.ts",
+--     "tailwind.config.mjs",
+--     "tailwind.config.cjs"
+--   ),
+-- }
 
 lspconfig.rust_analyzer.setup {
   on_attach = on_attach,
@@ -95,66 +95,64 @@ local on_attach_tsserver = function(client, bufnr)
   on_attach(client, bufnr)
 end
 
-lspconfig.ts_ls.setup {
-  -- on_attach = on_attach,
-  on_attach = on_attach_tsserver,
-  on_init = on_init,
-  capabilities = capabilities,
-  init_options = {
-    -- maxTsServerMemory = 12288,
-    preferences = {
-      disableSuggestions = false,
-      codeLens = {
-        references = true,
-        implementations = true,
-      },
-    },
-  },
-  commands = {
-    OrganizeImports = {
-      organise_imports,
-      description = "Organize Imports",
-    },
-    AddMissingImports = {
-      add_missing_import,
-      description = "Add missing imports",
-    },
-  },
-  settings = {
-    importModuleSpecifierPreference = "non-relative",
-    -- enable code lens
-    javascript = {
-      codeLens = {
-        references = true,
-        implementations = true,
-      },
-      inlayHints = {
-        -- includeInlayEnumMemberValueHints = true,
-        -- includeInlayFunctionLikeReturnTypeHints = true,
-        -- includeInlayFunctionParameterTypeHints = true,
-        includeInlayParameterNameHints = "all",
-        -- includeInlayParameterNameHintsWhenArgumentMatchesName = true,
-        -- includeInlayPropertyDeclarationTypeHints = true,
-        -- includeInlayVariableTypeHints = true,
-      },
-    },
-    typescript = {
-      codeLens = {
-        references = true,
-        implementations = true,
-      },
-      inlayHints = {
-        -- includeInlayEnumMemberValueHints = true,
-        -- includeInlayFunctionLikeReturnTypeHints = true,
-        -- includeInlayFunctionParameterTypeHints = true,
-        includeInlayParameterNameHints = "all",
-        -- includeInlayParameterNameHintsWhenArgumentMatchesName = true,
-        -- includeInlayPropertyDeclarationTypeHints = true,
-        -- includeInlayVariableTypeHints = true,
-      },
-    },
-  },
-}
+-- lspconfig.ts_ls.setup {
+--   on_attach = on_attach_tsserver,
+--   on_init = on_init,
+--   capabilities = capabilities,
+--   init_options = {
+--     preferences = {
+--       disableSuggestions = false,
+--       codeLens = {
+--         references = true,
+--         implementations = true,
+--       },
+--     },
+--   },
+--   commands = {
+--     OrganizeImports = {
+--       organise_imports,
+--       description = "Organize Imports",
+--     },
+--     AddMissingImports = {
+--       add_missing_import,
+--       description = "Add missing imports",
+--     },
+--   },
+--   settings = {
+--     importModuleSpecifierPreference = "non-relative",
+--     -- enable code lens
+--     javascript = {
+--       codeLens = {
+--         references = true,
+--         implementations = true,
+--       },
+--       inlayHints = {
+--         -- includeInlayEnumMemberValueHints = true,
+--         -- includeInlayFunctionLikeReturnTypeHints = true,
+--         -- includeInlayFunctionParameterTypeHints = true,
+--         includeInlayParameterNameHints = "all",
+--         -- includeInlayParameterNameHintsWhenArgumentMatchesName = true,
+--         -- includeInlayPropertyDeclarationTypeHints = true,
+--         -- includeInlayVariableTypeHints = true,
+--       },
+--     },
+--     typescript = {
+--       codeLens = {
+--         references = true,
+--         implementations = true,
+--       },
+--       inlayHints = {
+--         -- includeInlayEnumMemberValueHints = true,
+--         -- includeInlayFunctionLikeReturnTypeHints = true,
+--         -- includeInlayFunctionParameterTypeHints = true,
+--         includeInlayParameterNameHints = "all",
+--         -- includeInlayParameterNameHintsWhenArgumentMatchesName = true,
+--         -- includeInlayPropertyDeclarationTypeHints = true,
+--         -- includeInlayVariableTypeHints = true,
+--       },
+--     },
+--   },
+-- }
 
 lspconfig.lua_ls.setup {
   on_attach = on_attach,

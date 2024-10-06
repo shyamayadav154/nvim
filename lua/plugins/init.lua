@@ -2,14 +2,168 @@ return {
   "NvChad/nvcommunity",
   { import = "nvcommunity.tools.telescope-fzf-native" },
   { import = "nvcommunity.git.lazygit" },
-  { import = "nvcommunity.motion.harpoon" },
   { import = "nvcommunity.editor.treesj" },
   { import = "nvcommunity.motion.harpoon" },
   { import = "nvcommunity.editor.autosave" },
-  { import = "nvcommunity.editor.treesittercontext" },
+  -- { import = "nvcommunity.editor.treesittercontext" },
+  {
+    "nvim-treesitter/nvim-treesitter-context",
+    event = "BufReadPost",
+    config = function()
+      require("treesitter-context").setup {
+        throttle = true,
+        max_lines = 5,
+        patterns = {
+          default = {
+            "class",
+            "function",
+            "method",
+          },
+          prisma = {
+            "type",
+            "identifier",
+            "model_declaration",
+          },
+        },
+      }
+    end,
+  },
+  {
+    "kevinhwang91/nvim-ufo",
+    event = "BufRead",
+    dependencies = "kevinhwang91/promise-async",
+    opts = {
+      provider = { "lsp", "indent" },
+    },
+  },
   {
     import = "nvcommunity.editor.treesj",
     opts = { max_join_length = 160 },
+  },
+  {
+    "yetone/avante.nvim",
+    event = "VeryLazy",
+    lazy = false,
+    version = false, -- set this if you want to always pull the latest change
+    opts = {
+      ---@alias Provider "claude" | "openai" | "azure" | "gemini" | "cohere" | "copilot" | string
+      provider = "gemini", -- Recommend using Claude
+      auto_suggestions_provider = "copilot",
+      gemini = {
+        endpoint = "https://generativelanguage.googleapis.com/v1beta/models",
+        model = "gemini-1.5-flash-002",
+        timeout = 30000, -- Timeout in milliseconds
+        temperature = 0,
+        max_tokens = 4096,
+        ["local"] = false,
+      },
+      -- copilot = {
+      --   endpoint = "https://api.githubcopilot.com",
+      --   model = "gpt-4o-2024-05-13",
+      --   proxy = nil, -- [protocol://]host[:port] Use this proxy
+      --   allow_insecure = false, -- Allow insecure server connections
+      --   timeout = 30000, -- Timeout in milliseconds
+      --   temperature = 0,
+      --   max_tokens = 4096,
+      -- },
+      behaviour = {
+        auto_suggestions = false, -- Experimental stage
+        auto_set_highlight_group = true,
+        auto_set_keymaps = true,
+        auto_apply_diff_after_generation = false,
+        support_paste_from_clipboard = false,
+      },
+      mappings = {
+        --- @class AvanteConflictMappings
+        diff = {
+          ours = "co",
+          theirs = "ct",
+          all_theirs = "ca",
+          both = "cb",
+          cursor = "cc",
+          next = "]x",
+          prev = "[x",
+        },
+        suggestion = {
+          accept = "<M-l>",
+          next = "<M-]>",
+          prev = "<M-[>",
+          dismiss = "<C-]>",
+        },
+        jump = {
+          next = "]]",
+          prev = "[[",
+        },
+        submit = {
+          normal = "<CR>",
+          insert = "<C-s>",
+        },
+        sidebar = {
+          switch_windows = "<Tab>",
+          reverse_switch_windows = "<S-Tab>",
+        },
+      },
+      hints = { enabled = true },
+      windows = {
+        ---@type "right" | "left" | "top" | "bottom"
+        position = "right", -- the position of the sidebar
+        wrap = true, -- similar to vim.o.wrap
+        width = 35, -- default % based on available width
+        sidebar_header = {
+          align = "center", -- left, center, right for title
+          rounded = true,
+        },
+      },
+      highlights = {
+        ---@type AvanteConflictHighlights
+        diff = {
+          current = "DiffText",
+          incoming = "DiffAdd",
+        },
+      },
+      --- @class AvanteConflictUserConfig
+      diff = {
+        autojump = true,
+        ---@type string | fun(): any
+        list_opener = "copen",
+      },
+    },
+    -- if you want to build from source then do `make BUILD_FROM_SOURCE=true`
+    build = "make",
+    -- build = "powershell -ExecutionPolicy Bypass -File Build.ps1 -BuildFromSource false" -- for windows
+    dependencies = {
+      "stevearc/dressing.nvim",
+      "nvim-lua/plenary.nvim",
+      "MunifTanjim/nui.nvim",
+      --- The below dependencies are optional,
+      "nvim-tree/nvim-web-devicons", -- or echasnovski/mini.icons
+      "zbirenbaum/copilot.lua", -- for providers='copilot'
+      {
+        -- support for image pasting
+        "HakonHarnes/img-clip.nvim",
+        event = "VeryLazy",
+        opts = {
+          -- recommended settings
+          default = {
+            embed_image_as_base64 = false,
+            prompt_for_file_name = false,
+            drag_and_drop = {
+              insert_mode = true,
+            },
+            -- required for Windows users
+            use_absolute_path = true,
+          },
+        },
+      },
+      {
+        -- Make sure to set this up properly if you have lazy=true
+        "MeanderingProgrammer/render-markdown.nvim",
+        opts = {
+          file_types = { "markdown", "Avante" },
+        },
+        ft = { "markdown", "Avante" },
+      },
+    },
   },
   {
     "aaronhallaert/advanced-git-search.nvim",
@@ -174,21 +328,21 @@ return {
     end,
   },
   {
-    -- vim dadbod
-    "tpope/vim-dadbod",
+    "kristijanhusak/vim-dadbod-ui",
     dependencies = {
-      "kristijanhusak/vim-dadbod-ui",
-      "kristijanhusak/vim-dadbod-completion",
-      "hrsh7th/nvim-cmp",
+      { "tpope/vim-dadbod", lazy = true },
+      { "kristijanhusak/vim-dadbod-completion", ft = { "sql", "mysql", "plsql" }, lazy = true }, -- Optional
     },
-    config = function()
-      require("configs.dadbod").setup()
-    end,
     cmd = {
+      "DBUI",
       "DBUIToggle",
       "DBUIAddConnection",
-      "DBUI",
+      "DBUIFindBuffer",
     },
+    init = function()
+      -- Your DBUI configuration
+      vim.g.db_ui_use_nerd_fonts = 1
+    end,
   },
   {
     "axieax/urlview.nvim",
@@ -287,18 +441,18 @@ return {
     dependencies = { "nvim-lua/plenary.nvim" },
     opts = { signs = false },
   },
-  -- {
-  --   "pmizio/typescript-tools.nvim",
-  --   event = "BufReadPre",
-  --   dependencies = {
-  --     "nvim-lua/plenary.nvim",
-  --     "neovim/nvim-lspconfig",
-  --   },
-  --   opts = {},
-  --   config = function()
-  --     require "configs.typescript-tools"
-  --   end,
-  -- },
+  {
+    "pmizio/typescript-tools.nvim",
+    event = "BufReadPre",
+    dependencies = {
+      "nvim-lua/plenary.nvim",
+      "neovim/nvim-lspconfig",
+    },
+    opts = {},
+    config = function()
+      require "configs.typescript-tools"
+    end,
+  },
   {
     "axelvc/template-string.nvim",
     event = "VeryLazy",
@@ -372,35 +526,35 @@ return {
   -- },
   {
     "nvim-telescope/telescope.nvim",
-    -- dependencies = {
-    --   {
-    --     "nvim-telescope/telescope-live-grep-args.nvim",
-    --     -- This will not install any breaking changes.
-    --     -- For major updates, this must be adjusted manually.
-    --     version = "^1.0.0",
-    --   },
-    -- },
-    -- -- opts = function()
-    --   local conf = require "nvchad.configs.telescope"
-    --   local actions = require "telescope.actions"
-    --   local telescope = require "telescope" -- no need
-    --
-    --   telescope.load_extension "live_grep_args"
-    --
-    --   conf.defaults.mappings.n = {
-    --     ["<C-Enter"] = actions.to_fuzzy_refine,
-    --     ["q"] = actions.close,
-    --     ["<C-w>"] = actions.send_selected_to_qflist + actions.open_qflist,
-    --   }
-    --
-    --   conf.defaults.mappings.i = {
-    --     ["<c-enter"] = actions.to_fuzzy_refine,
-    --     ["<C-j>"] = actions.cycle_history_next,
-    --     ["<C-k>"] = actions.cycle_history_prev,
-    --     ["<C-w>"] = actions.send_selected_to_qflist + actions.open_qflist,
-    --   }
-    --   return conf
-    -- end,
+    dependencies = {
+      {
+        "nvim-telescope/telescope-live-grep-args.nvim",
+        -- This will not install any breaking changes.
+        -- For major updates, this must be adjusted manually.
+        version = "^1.0.0",
+      },
+    },
+    opts = function()
+      local conf = require "nvchad.configs.telescope"
+      local actions = require "telescope.actions"
+      local telescope = require "telescope" -- no need
+
+      telescope.load_extension "live_grep_args"
+
+      conf.defaults.mappings.n = {
+        ["<C-Enter"] = actions.to_fuzzy_refine,
+        ["q"] = actions.close,
+        ["<C-w>"] = actions.send_selected_to_qflist + actions.open_qflist,
+      }
+
+      conf.defaults.mappings.i = {
+        ["<c-enter"] = actions.to_fuzzy_refine,
+        ["<C-j>"] = actions.cycle_history_next,
+        ["<C-k>"] = actions.cycle_history_prev,
+        ["<C-w>"] = actions.send_selected_to_qflist + actions.open_qflist,
+      }
+      return conf
+    end,
     -- opts = {
     --   defaults = {
     --     mappings = {
@@ -629,108 +783,113 @@ return {
       "nvim-treesitter/nvim-treesitter-textobjects",
     },
     build = ":TSUpdate",
-    opts = {
-      auto_install = true,
-      ensure_installed = {
-        "vim",
-        "lua",
-        "vimdoc",
-        "html",
-        "css",
-        "javascript",
-        "typescript",
-        "tsx",
-        "graphql",
-        "json",
-      },
-      textobjects = {
-        select = {
-          enable = true,
-          -- Automatically jump forward to textobj, similar to targets.vim
-          lookahead = true,
+    opts = function(_,conf)
 
-          keymaps = {
-            -- You can use the capture groups defined in textobjects.scm
-            ["af"] = "@function.outer",
-            ["if"] = "@function.inner",
-            ["am"] = "@function.outer",
-            ["im"] = "@function.inner",
-
-            ["ac"] = "@call.outer",
-            ["ic"] = "@call.inner",
-            ["ai"] = "@conditional.outer",
-            ["ii"] = "@conditional.inner",
-            ["al"] = "@loop.outer",
-            ["il"] = "@loop.inner",
-            ["ar"] = "@return.outer",
-            ["ir"] = "@return.inner",
-
-            -- ["ac"] = "@class.outer",
-            -- ["ic"] = { query = "@class.inner", desc = "Select inner part of a class region" },
-          },
-          selection_modes = {
-            ["@parameter.outer"] = "v", -- charwise
-            ["@function.outer"] = "V", -- linewise
-            ["@class.outer"] = "<c-v>", -- blockwise
-          },
-
-          include_surrounding_whitespace = false,
+      local l = {
+        auto_install = true,
+        ensure_installed = {
+          "vim",
+          "lua",
+          "vimdoc",
+          "html",
+          "css",
+          "javascript",
+          "typescript",
+          "tsx",
+          "graphql",
+          "json",
         },
-        swap = {
-          enable = true,
-          swap_next = {
-            ["<leader>nf"] = "@function.outer",
-            ["<leader>nm"] = "@function.outer",
+        textobjects = {
+          select = {
+            enable = true,
+            -- Automatically jump forward to textobj, similar to targets.vim
+            lookahead = true,
+
+            keymaps = {
+              -- You can use the capture groups defined in textobjects.scm
+              ["af"] = "@function.outer",
+              ["if"] = "@function.inner",
+              ["am"] = "@function.outer",
+              ["im"] = "@function.inner",
+
+              ["ac"] = "@call.outer",
+              ["ic"] = "@call.inner",
+              ["ai"] = "@conditional.outer",
+              ["ii"] = "@conditional.inner",
+              ["al"] = "@loop.outer",
+              ["il"] = "@loop.inner",
+              ["ar"] = "@return.outer",
+              ["ir"] = "@return.inner",
+
+              -- ["ac"] = "@class.outer",
+              -- ["ic"] = { query = "@class.inner", desc = "Select inner part of a class region" },
+            },
+            selection_modes = {
+              ["@parameter.outer"] = "v", -- charwise
+              ["@function.outer"] = "V", -- linewise
+              ["@class.outer"] = "<c-v>", -- blockwise
+            },
+
+            include_surrounding_whitespace = false,
+          },
+          swap = {
+            enable = true,
+            swap_next = {
+              ["<leader>nf"] = "@function.outer",
+              ["<leader>nm"] = "@function.outer",
+            },
+          },
+          move = {
+            enable = true,
+            set_jumps = true, -- whether to set jumps in the jumplist
+            goto_next_start = {
+              ["]f"] = "@function.outer",
+              ["]m"] = "@function.outer",
+              -- You can use regex matching (i.e. lua pattern) and/or pass a list in a "query" key to group multiple queries.
+              ["]l"] = "@loop.inner",
+              -- ["]o"] = { query = { "@loop.inner", "@loop.outer" } }
+              --
+              -- You can pass a query group to use query from `queries/<lang>/<query_group>.scm file in your runtime path.
+              -- Below example nvim-treesitter's `locals.scm` and `folds.scm`. They also provide highlights.scm and indent.scm.
+              -- ["]s"] = { query = "@scope", query_group = "locals", desc = "Next scope" },
+              ["]z"] = { query = "@fold", query_group = "folds", desc = "Next fold" },
+            },
+            -- goto_next_end = {
+            --   ["]M"] = "@function.outer",
+            --   ["]["] = "@class.outer",
+            -- },
+            goto_previous_start = {
+              ["[f"] = "@function.outer",
+              ["[m"] = "@function.outer",
+              ["[l"] = "@loop.inner",
+            },
+            -- goto_previous_end = {
+            --   ["[M"] = "@function.outer",
+            --   ["[]"] = "@class.outer",
+            -- },
+            -- Below will go to either the start or the end, whichever is closer.
+            -- Use if you want more granular movements
+            -- Make it even more gradual by adding multiple queries and regex.
+            goto_next = {
+              ["]i"] = "@conditional.outer",
+            },
+            goto_previous = {
+              ["[i"] = "@conditional.outer",
+            },
           },
         },
-        move = {
+        highlights = {
           enable = true,
-          set_jumps = true, -- whether to set jumps in the jumplist
-          goto_next_start = {
-            ["]f"] = "@function.outer",
-            ["]m"] = "@function.outer",
-            -- You can use regex matching (i.e. lua pattern) and/or pass a list in a "query" key to group multiple queries.
-            ["]l"] = "@loop.inner",
-            -- ["]o"] = { query = { "@loop.inner", "@loop.outer" } }
-            --
-            -- You can pass a query group to use query from `queries/<lang>/<query_group>.scm file in your runtime path.
-            -- Below example nvim-treesitter's `locals.scm` and `folds.scm`. They also provide highlights.scm and indent.scm.
-            -- ["]s"] = { query = "@scope", query_group = "locals", desc = "Next scope" },
-            ["]z"] = { query = "@fold", query_group = "folds", desc = "Next fold" },
-          },
-          -- goto_next_end = {
-          --   ["]M"] = "@function.outer",
-          --   ["]["] = "@class.outer",
+        },
+        indent = {
+          enable = true,
+          -- disable = {
+          --   "ruby"
           -- },
-          goto_previous_start = {
-            ["[f"] = "@function.outer",
-            ["[m"] = "@function.outer",
-            ["[l"] = "@loop.inner",
-          },
-          -- goto_previous_end = {
-          --   ["[M"] = "@function.outer",
-          --   ["[]"] = "@class.outer",
-          -- },
-          -- Below will go to either the start or the end, whichever is closer.
-          -- Use if you want more granular movements
-          -- Make it even more gradual by adding multiple queries and regex.
-          goto_next = {
-            ["]i"] = "@conditional.outer",
-          },
-          goto_previous = {
-            ["[i"] = "@conditional.outer",
-          },
         },
-      },
-      highlights = {
-        enable = true,
-      },
-      indent = {
-        enable = true,
-        -- disable = {
-        --   "ruby"
-        -- },
-      },
-    },
+      }
+      table.insert(conf,l)
+      return conf
+    end,
   },
 }

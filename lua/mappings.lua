@@ -28,6 +28,20 @@ local kopts = { noremap = true, silent = true }
 
 vim.keymap.set("n", "<Leader>l", "<Cmd>noh<CR>", kopts)
 
+-- Using ufo provider need remap `zR` and `zM`. If Neovim is 0.6.1, remap yourself
+map('n', 'zR', require('ufo').openAllFolds, {desc = 'Open all folds'})
+map('n', 'zM', require('ufo').closeAllFolds, {desc = 'Close all folds'})
+-- peek
+map('n', 'zK', function()
+    local winid = require('ufo').peekFoldedLinesUnderCursor()
+    if not winid then
+        -- choose one of coc.nvim and nvim lsp
+        vim.fn.CocActionAsync('definitionHover') -- coc.nvim
+        vim.lsp.buf.hover()
+    end
+end)
+
+
 nomap("n", "<leader>n") -- relative line number toggle disabled
 nomap("n", "<leader>b") -- git sign blame disabled
 -- if has keymap at leader gb then remap
@@ -129,7 +143,7 @@ map("i", "<A-p>", "<CMD>lua require('luasnip').jump(-1)<CR>", { desc = "Jump one
 map("i", "<A-e>", "<CMD>lua require('luasnip').expand_or_jump()<CR>", { desc = "Jump onestep", silent = true })
 map("n", ";", ":", { desc = "enter command mode", nowait = true })
 map("n", "<leader>qu", ":lua unique_quickfix_list()<CR>", { desc = "Unique quickfix list" })
-map("n", "<leader>gh", "<CMD>Gitsigns preview_hunk<CR>", { desc = "Preview Hunk" })
+map("n", "<leader>ph", "<CMD>Gitsigns preview_hunk<CR>", { desc = "Preview Hunk" })
 map("n", "<leader>rh", "<CMD>Gitsigns reset_hunk<CR>", { desc = "Reset Hunk" })
 map("n", "<leader>dl", "<CMD>diffget //2<CR>", { desc = "Diff get right" })
 map("n", "<leader>dh", "<CMD>diffget //3<CR>", { desc = "Diff get left" })
@@ -151,12 +165,16 @@ map("n", "<leader>ih", function()
 end, { desc = "Toggle inlay hints", silent = true })
 
 -- Telescope searches
-map(
-  "n",
-  "<leader>ff",
-  "<CMD>Telescope find_files hidden=true find_command=rg,--files,--hidden,--glob,!.git <CR>",
-  { desc = "Find Files hidden too" }
-)
+-- map(
+--   "n",
+--   "<leader>ff",
+--   "<CMD>Telescope find_files hidden=true find_command=rg,--files,--hidden,--glob,!.git <CR>",
+--   { desc = "Find Files hidden too" }
+-- )
+
+-- Telescope searches
+map("n", "<leader>fw", "<CMD>Telescope live_grep_args<CR>", { desc = "Find Files hidden too" })
+
 map("n", "<leader>gf", "<CMD>Telescop git_status<CR>", { desc = "git status" })
 map("n", "<leader>fr", "<CMD>Telescope lsp_references<CR>", { desc = "lsp references" })
 map("n", "<leader>fs", "<CMD>Telescope grep_string<CR>", { desc = "findt string under cursor" })
