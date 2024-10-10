@@ -940,6 +940,7 @@
     "key": "consoleDir",
     "prefix": "cdi",
     "body": [
+      "console.log('${1:first}')",
       "console.dir(${1:first},{ depth: Infinity })"
     ],
     "description": "Prints a JavaScript representation of the specified object",
