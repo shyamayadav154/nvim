@@ -4,8 +4,122 @@ return {
   { import = "nvcommunity.git.lazygit" },
   { import = "nvcommunity.editor.treesj" },
   { import = "nvcommunity.motion.harpoon" },
-  { import = "nvcommunity.editor.autosave" },
+  -- { import = "nvcommunity.editor.autosave" },
   { import = "nvcommunity.editor.treesittercontext" },
+  {
+    "ravitemer/mcphub.nvim",
+    dependencies = {
+      "nvim-lua/plenary.nvim", -- Required for Job and HTTP requests
+    },
+    -- comment the following line to ensure hub will be ready at the earliest
+    cmd = "MCPHub", -- lazy load by default
+    build = "npm install -g mcp-hub@latest", -- Installs required mcp-hub npm module
+    -- uncomment this if you don't want mcp-hub to be available globally or can't use -g
+    -- build = "bundled_build.lua",  -- Use this and set use_bundled_binary = true in opts  (see Advanced configuration)
+    -- config = function()
+    --   require("mcphub").setup()
+    -- end,
+    opts = {
+      auto_approve = true, -- Auto approve mcp tool calls
+    },
+  },
+  {
+    "folke/trouble.nvim",
+    opts = {}, -- for default options, refer to the configuration section for custom setup.
+    cmd = "Trouble",
+    keys = {
+      {
+        "<leader>dd",
+        "<cmd>Trouble diagnostics toggle filter.severity=vim.diagnostic.severity.ERROR <cr>",
+        desc = "Diagnostics (Trouble)",
+      },
+      {
+        "<leader>db",
+        "<cmd>Trouble diagnostics toggle filter.buf=0 filter.severity=vim.diagnostic.severity.ERROR<cr>",
+        desc = "Buffer Diagnostics (Trouble)",
+      },
+      {
+        "<leader>cs",
+        "<cmd>Trouble symbols toggle focus=false<cr>",
+        desc = "Symbols (Trouble)",
+      },
+      {
+        "<leader>cl",
+        "<cmd>Trouble lsp toggle focus=false win.position=right<cr>",
+        desc = "LSP Definitions / references / ... (Trouble)",
+      },
+      {
+        "<leader>xL",
+        "<cmd>Trouble loclist toggle<cr>",
+        desc = "Location List (Trouble)",
+      },
+      {
+        "<leader>xQ",
+        "<cmd>Trouble qflist toggle<cr>",
+        desc = "Quickfix List (Trouble)",
+      },
+    },
+  },
+  {
+    "okuuva/auto-save.nvim",
+    event = { "InsertLeave", "TextChanged" },
+    opts = {
+      callbacks = {
+        before_saving = function()
+          -- save global autoformat status
+          vim.g.OLD_AUTOFORMAT = vim.g.autoformat_enabled
+          vim.g.autoformat_enabled = false
+          vim.g.OLD_AUTOFORMAT_BUFFERS = {}
+          -- disable all manually enabled buffers
+          for _, bufnr in ipairs(vim.api.nvim_list_bufs()) do
+            if vim.b[bufnr].autoformat_enabled then
+              table.insert(vim.g.OLD_BUFFER_AUTOFORMATS, bufnr)
+              vim.b[bufnr].autoformat_enabled = false
+            end
+          end
+        end,
+        after_saving = function()
+          -- restore global autoformat status
+          vim.g.autoformat_enabled = vim.g.OLD_AUTOFORMAT
+          -- reenable all manually enabled buffers
+          for _, bufnr in ipairs(vim.g.OLD_AUTOFORMAT_BUFFERS or {}) do
+            vim.b[bufnr].autoformat_enabled = true
+          end
+        end,
+      },
+    },
+  },
+  {
+    cmd = { "ContextEnable" },
+    "wellle/context.vim",
+  },
+  -- {
+  --   event = "VeryLazy",
+  --   "karb94/neoscroll.nvim",
+  --   opts = {
+  --     mappings = {
+  --       "<C-u>",
+  --       "<C-d>",
+  --       "<C-b>",
+  --       "<C-f>",
+  --       "<C-y>",
+  --       "<C-e>",
+  --       "zt",
+  --       "zz",
+  --       "zb",
+  --     },
+  --   },
+  -- },
+  {
+    event = "VeryLazy",
+    "folke/todo-comments.nvim",
+    dependencies = { "nvim-lua/plenary.nvim" },
+    opts = {
+      -- your configuration comes here
+      -- or leave it empty to use the default settings
+      -- refer to the configuration section below
+    },
+  },
   {
     "kevinhwang91/nvim-ufo",
     event = "BufRead",
@@ -24,6 +138,28 @@ return {
     lazy = false,
     version = false, -- set this if you want to always pull the latest change
     opts = {
+      disabled_tools = {
+        "list_files",
+        "search_files",
+        "read_file",
+        "create_file",
+        "rename_file",
+        "delete_file",
+        "create_dir",
+        "rename_dir",
+        "delete_dir",
+        "bash",
+      },
+      system_prompt = function()
+        local hub = require("mcphub").get_hub_instance()
+        return hub:get_active_servers_prompt()
+      end,
+      -- The custom_tools type supports both a list and a function that returns a list. Using a function here prevents requiring mcphub before it's loaded
+      custom_tools = function()
+        return {
+          require("mcphub.extensions.avante").mcp_tool(),
+        }
+      end,
       ---@alias Provider "claude" | "openai" | "azure" | "gemini" | "cohere" | "copilot" | string
       provider = "copilot", -- Recommend using Claude
       auto_suggestions_provider = "copilot",
@@ -63,7 +199,7 @@ return {
           prev = "[x",
         },
         suggestion = {
-          accept = "<M-l>",
+          accept = "<M-k>",
           next = "<M-]>",
           prev = "<M-[>",
           dismiss = "<C-]>",
@@ -113,6 +249,7 @@ return {
       "stevearc/dressing.nvim",
       "nvim-lua/plenary.nvim",
       "MunifTanjim/nui.nvim",
+      "ravitemer/mcphub.nvim",
       --- The below dependencies are optional,
       "nvim-tree/nvim-web-devicons", -- or echasnovski/mini.icons
       "zbirenbaum/copilot.lua", -- for providers='copilot'
@@ -221,6 +358,7 @@ return {
   --   end,
   -- },
   {
+    -- enabled = false,
     "supermaven-inc/supermaven-nvim",
     event = "InsertEnter",
     config = function()
@@ -352,23 +490,7 @@ return {
   -- },
   {
     "tpope/vim-fugitive",
-    cmd = {
-      "Git",
-      "Gdiffsplit",
-      "Gvdiffsplit",
-      "Gsplit",
-      "Gvsplit",
-      "Gread",
-      "Gwrite",
-      "Ggrep",
-      "GMove",
-      "GDelete",
-      "GBrowse",
-      "GRemove",
-      "GRename",
-      "Glgrep",
-      "Gedit",
-    },
+    event = "VeryLazy",
     opt = {},
   },
   {
@@ -518,6 +640,7 @@ return {
       local telescope = require "telescope" -- no need
 
       telescope.load_extension "live_grep_args"
+      -- old files on cwd only
 
       conf.defaults.mappings.n = {
         ["<C-Enter"] = actions.to_fuzzy_refine,
@@ -668,15 +791,14 @@ return {
   },
   -- {
   --   "CopilotC-Nvim/CopilotChat.nvim",
-  --   branch = "canary",
-  --   event = "BufRead",
+  --   cmd = {'CopilotChatOpen'},
   --   dependencies = {
-  --     { "zbirenbaum/copilot.lua" }, -- or github/copilot.vim
-  --     { "nvim-lua/plenary.nvim" }, -- for curl, log wrapper
+  --     { "zbirenbaum/copilot.lua" }, -- or zbirenbaum/copilot.lua
+  --     { "nvim-lua/plenary.nvim", branch = "master" }, -- for curl, log and async functions
   --   },
+  --   build = "make tiktoken", -- Only on MacOS or Linux
   --   opts = {
-  --     debug = false, -- Enable debugging
-  --     -- See Configuration section for rest
+  --     -- See Configuration section for options
   --   },
   --   -- See Commands section for default commands if you want to lazy load on them
   -- },
@@ -698,7 +820,16 @@ return {
   --     },
   --     suggestion = {
   --       auto_trigger = true,
-  --       debounce = 0,
+  --       debounce = 10,
+  --       hide_during_completion = true,
+  --       keymap = {
+  --         accept = "<M-l>",
+  --         accept_word = "<M-j>",
+  --         accept_line = false,
+  --         next = "<M-]>",
+  --         prev = "<M-[>",
+  --         dismiss = "<C-]>",
+  --       },
   --     },
   --   },
   -- },
@@ -720,7 +851,6 @@ return {
   --     require "configs.conform"
   --   end,
   -- },
-
   -- These are some examples, uncomment them if you want to see them work!
   {
     "neovim/nvim-lspconfig",
@@ -734,22 +864,6 @@ return {
       require "configs.lspconfig"
     end,
   },
-
-  {
-    "williamboman/mason.nvim",
-    -- deprecated
-    -- opts = {
-    --   ensure_installed = {
-    --     "lua-language-server",
-    --     "stylua",
-    --     "html-lsp",
-    --     "css-lsp",
-    --     "prettier",
-    --     "typescript-language-server",
-    --     "graphql",
-    --   },
-    -- },
-  },
   {
     "nvim-treesitter/playground",
     dependencies = "nvim-treesitter/nvim-treesitter",
@@ -757,117 +871,110 @@ return {
   },
   {
     "nvim-treesitter/nvim-treesitter",
+    build = ":TSUpdate",
     dependencies = {
       "nvim-treesitter/nvim-treesitter-textobjects",
     },
-    build = ":TSUpdate",
-    opts = function(_,conf)
-
-      local l = {
-        auto_install = true,
-        ensure_installed = {
-          "vim",
-          "lua",
-          "vimdoc",
-          "html",
-          "css",
-          "javascript",
-          "typescript",
-          "tsx",
-          "graphql",
-          "json",
-        },
-        textobjects = {
-          select = {
-            enable = true,
-            -- Automatically jump forward to textobj, similar to targets.vim
-            lookahead = true,
-
-            keymaps = {
-              -- You can use the capture groups defined in textobjects.scm
-              ["af"] = "@function.outer",
-              ["if"] = "@function.inner",
-              ["am"] = "@function.outer",
-              ["im"] = "@function.inner",
-
-              ["ac"] = "@call.outer",
-              ["ic"] = "@call.inner",
-              ["ai"] = "@conditional.outer",
-              ["ii"] = "@conditional.inner",
-              ["al"] = "@loop.outer",
-              ["il"] = "@loop.inner",
-              ["ar"] = "@return.outer",
-              ["ir"] = "@return.inner",
-
-              -- ["ac"] = "@class.outer",
-              -- ["ic"] = { query = "@class.inner", desc = "Select inner part of a class region" },
-            },
-            selection_modes = {
-              ["@parameter.outer"] = "v", -- charwise
-              ["@function.outer"] = "V", -- linewise
-              ["@class.outer"] = "<c-v>", -- blockwise
-            },
-
-            include_surrounding_whitespace = false,
-          },
-          swap = {
-            enable = true,
-            swap_next = {
-              ["<leader>nf"] = "@function.outer",
-              ["<leader>nm"] = "@function.outer",
-            },
-          },
-          move = {
-            enable = true,
-            set_jumps = true, -- whether to set jumps in the jumplist
-            goto_next_start = {
-              ["]f"] = "@function.outer",
-              ["]m"] = "@function.outer",
-              -- You can use regex matching (i.e. lua pattern) and/or pass a list in a "query" key to group multiple queries.
-              ["]l"] = "@loop.inner",
-              -- ["]o"] = { query = { "@loop.inner", "@loop.outer" } }
-              --
-              -- You can pass a query group to use query from `queries/<lang>/<query_group>.scm file in your runtime path.
-              -- Below example nvim-treesitter's `locals.scm` and `folds.scm`. They also provide highlights.scm and indent.scm.
-              -- ["]s"] = { query = "@scope", query_group = "locals", desc = "Next scope" },
-              ["]z"] = { query = "@fold", query_group = "folds", desc = "Next fold" },
-            },
-            -- goto_next_end = {
-            --   ["]M"] = "@function.outer",
-            --   ["]["] = "@class.outer",
-            -- },
-            goto_previous_start = {
-              ["[f"] = "@function.outer",
-              ["[m"] = "@function.outer",
-              ["[l"] = "@loop.inner",
-            },
-            -- goto_previous_end = {
-            --   ["[M"] = "@function.outer",
-            --   ["[]"] = "@class.outer",
-            -- },
-            -- Below will go to either the start or the end, whichever is closer.
-            -- Use if you want more granular movements
-            -- Make it even more gradual by adding multiple queries and regex.
-            goto_next = {
-              ["]i"] = "@conditional.outer",
-            },
-            goto_previous = {
-              ["[i"] = "@conditional.outer",
-            },
-          },
-        },
-        highlights = {
+    opts = {
+      auto_install = true,
+      ensure_installed = {
+        "vim",
+        "lua",
+        "vimdoc",
+        "html",
+        "css",
+        "javascript",
+        "typescript",
+        "tsx",
+        "graphql",
+        "json",
+      },
+      textobjects = {
+        select = {
           enable = true,
+          -- Automatically jump forward to textobj, similar to targets.vim
+          lookahead = true,
+
+          keymaps = {
+            -- You can use the capture groups defined in textobjects.scm
+            ["af"] = "@function.outer",
+            ["if"] = "@function.inner",
+            ["am"] = "@function.outer",
+            ["im"] = "@function.inner",
+
+            ["ac"] = "@call.outer",
+            ["ic"] = "@call.inner",
+            ["ai"] = "@conditional.outer",
+            ["ii"] = "@conditional.inner",
+            ["al"] = "@loop.outer",
+            ["il"] = "@loop.inner",
+            ["ar"] = "@return.outer",
+            ["ir"] = "@return.inner",
+
+            -- ["ac"] = "@class.outer",
+            -- ["ic"] = { query = "@class.inner", desc = "Select inner part of a class region" },
+          },
+          selection_modes = {
+            ["@parameter.outer"] = "v", -- charwise
+            ["@function.outer"] = "V", -- linewise
+            ["@class.outer"] = "<c-v>", -- blockwise
+          },
+
+          include_surrounding_whitespace = false,
         },
-        indent = {
+        swap = {
           enable = true,
-          -- disable = {
-          --   "ruby"
+          swap_next = {
+            ["<leader>nf"] = "@function.outer",
+            ["<leader>nm"] = "@function.outer",
+            -- function argument swap
+            ["<leader>na"] = "@parameter.inner",
+            -- ["<leader>np"] = "@parameter.outer",
+          },
+          swap_previous = {
+            -- ["<leader>na"] = "@parameter.inner",
+            ["<leader>np"] = "@parameter.inner",
+          },
+        },
+        move = {
+          enable = true,
+          set_jumps = true, -- whether to set jumps in the jumplist
+          goto_next_start = {
+            ["]f"] = "@function.outer",
+            ["]m"] = "@function.outer",
+            -- You can use regex matching (i.e. lua pattern) and/or pass a list in a "query" key to group multiple queries.
+            ["]l"] = "@loop.inner",
+            -- ["]o"] = { query = { "@loop.inner", "@loop.outer" } }
+            --
+            -- You can pass a query group to use query from `queries/<lang>/<query_group>.scm file in your runtime path.
+            -- Below example nvim-treesitter's `locals.scm` and `folds.scm`. They also provide highlights.scm and indent.scm.
+            -- ["]s"] = { query = "@scope", query_group = "locals", desc = "Next scope" },
+            ["]z"] = { query = "@fold", query_group = "folds", desc = "Next fold" },
+          },
+          -- goto_next_end = {
+          --   ["]M"] = "@function.outer",
+          --   ["]["] = "@class.outer",
           -- },
+          goto_previous_start = {
+            ["[f"] = "@function.outer",
+            ["[m"] = "@function.outer",
+            ["[l"] = "@loop.inner",
+          },
+          -- goto_previous_end = {
+          --   ["[M"] = "@function.outer",
+          --   ["[]"] = "@class.outer",
+          -- },
+          -- Below will go to either the start or the end, whichever is closer.
+          -- Use if you want more granular movements
+          -- Make it even more gradual by adding multiple queries and regex.
+          goto_next = {
+            ["]i"] = "@conditional.outer",
+          },
+          goto_previous = {
+            ["[i"] = "@conditional.outer",
+          },
         },
-      }
-      table.insert(conf,l)
-      return conf
-    end,
+      },
+    },
   },
 }

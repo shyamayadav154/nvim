@@ -3,8 +3,19 @@ require "nvchad.mappings"
 local map = vim.keymap.set
 local nomap = vim.keymap.del
 
+map("n", "<leader>lq", function()
+  vim.cmd [[set makeprg=eslint\ -f\ unix\ --quiet\ . ]]
+  vim.cmd [[silent! make]]
+  vim.cmd [[copen]]
+end, { desc = "Lint and populate quickfix" })
+
 vim.keymap.set({ "n", "x", "o" }, "s", "<Plug>(leap-forward)")
 vim.keymap.set({ "n", "x", "o" }, "S", "<Plug>(leap-backward)")
+
+-- show diagnostic under the cursor
+map("n", "<leader>lf", function()
+  vim.diagnostic.open_float()
+end, { desc = "Show diagnostic under the cursor" })
 
 local builtin = require "telescope.builtin"
 local actions = require "telescope.actions"
@@ -26,21 +37,20 @@ require("hlslens").setup()
 
 local kopts = { noremap = true, silent = true }
 
-vim.keymap.set("n", "<Leader>l", "<Cmd>noh<CR>", kopts)
+-- vim.keymap.set("n", "<Leader>l", "<Cmd>noh<CR>", kopts)
 
 -- Using ufo provider need remap `zR` and `zM`. If Neovim is 0.6.1, remap yourself
-map('n', 'zR', require('ufo').openAllFolds, {desc = 'Open all folds'})
-map('n', 'zM', require('ufo').closeAllFolds, {desc = 'Close all folds'})
+map("n", "zR", require("ufo").openAllFolds, { desc = "Open all folds" })
+map("n", "zM", require("ufo").closeAllFolds, { desc = "Close all folds" })
 -- peek
-map('n', 'zK', function()
-    local winid = require('ufo').peekFoldedLinesUnderCursor()
-    if not winid then
-        -- choose one of coc.nvim and nvim lsp
-        vim.fn.CocActionAsync('definitionHover') -- coc.nvim
-        vim.lsp.buf.hover()
-    end
+map("n", "zK", function()
+  local winid = require("ufo").peekFoldedLinesUnderCursor()
+  if not winid then
+    -- choose one of coc.nvim and nvim lsp
+    vim.fn.CocActionAsync "definitionHover" -- coc.nvim
+    vim.lsp.buf.hover()
+  end
 end)
-
 
 nomap("n", "<leader>n") -- relative line number toggle disabled
 nomap("n", "<leader>b") -- git sign blame disabled
@@ -53,7 +63,7 @@ nomap("n", "<M-i>")
 -- delete console from current page
 map("n", "<leader>cd", "<cmd>g/console/norm dd<CR>", { desc = "Delete console from current file/buffer" })
 -- floating window diagnostics
-map("n", "<leader>lf", "<cmd>lua vim.diagnostic.open_float()<cr>", { desc = "Delete console from current file/buffer" })
+-- map("n", "<leader>lf", "<cmd>lua vim.diagnostic.open_float()<cr>", { desc = "Delete console from current file/buffer" })
 
 map("n", "<leader>cl", function()
   local word = vim.fn.expand "<cword>" -- Get the word under the cursor
@@ -156,28 +166,42 @@ map("n", "gk", "<C-w>k", { desc = "Go to window above" })
 map("n", "gH", "<C-w>h", { desc = "Go to window left" })
 map("n", "gL", "<C-w>l", { desc = "Go to window right" })
 
+-- Keymap for LSP references
+map("n", "gr", "<cmd>lua vim.lsp.buf.references()<CR>", { desc = "LSP References in quickfix" })
+
 map("n", "<C-f>", ":silent !tmux neww ts<CR>", { desc = "Open new tmux window" })
-map("n", "<leader>gr", "<CMD>Gitsigns reset_buffer<CR>", { desc = "Git reset current file" })
-map("n", "<leader>gs", "<CMD>Gitsigns stage_hunk<CR>", { desc = "Git reset current file" })
+map("n", "<leader>gr", function()
+  require("gitsigns").reset_buffer()
+  print "reset file to last commit"
+end, { desc = "Git reset current file" })
+map("n", "<leader>gs", "<CMD>Gitsigns stage_hunk<CR>", { desc = "Git stage current hunk" })
 
 map("n", "<leader>ih", function()
   vim.lsp.inlay_hint.enable(not vim.lsp.inlay_hint.is_enabled())
 end, { desc = "Toggle inlay hints", silent = true })
 
 -- Telescope searches
--- map(
---   "n",
---   "<leader>ff",
---   "<CMD>Telescope find_files hidden=true find_command=rg,--files,--hidden,--glob,!.git <CR>",
---   { desc = "Find Files hidden too" }
--- )
+map(
+  "n",
+  "<leader>ff",
+  "<CMD>Telescope find_files hidden=true find_command=rg,--files,--hidden,--glob,!.git <CR>",
+  { desc = "Find Files hidden too" }
+)
 
 -- Telescope searches
-map("n", "<leader>fw", "<CMD>Telescope live_grep_args<CR>", { desc = "Find Files hidden too" })
+map("n", "<leader>fw", "<CMD>Telescope live_grep_args<CR>", { desc = "search words with regex" })
+
+-- telescope old files
+map("n", "<leader>fo", function()
+  require("telescope.builtin").oldfiles {
+    cwd_only = true,
+  }
+end, { desc = "Find old files in current directory" })
+
 
 map("n", "<leader>gf", "<CMD>Telescop git_status<CR>", { desc = "git status" })
-map("n", "<leader>fr", "<CMD>Telescope lsp_references<CR>", { desc = "lsp references" })
-map("n", "<leader>fs", "<CMD>Telescope grep_string<CR>", { desc = "findt string under cursor" })
+map("n", "<leader>fr", "<CMD>Telescope lsp_references<CR>", { desc = "telescope lsp references" })
+map("n", "<leader>fs", "<CMD>Telescope grep_string<CR>", { desc = " telescope find string under cursor" })
 map("n", "<leader>ws", "<CMD>Telescope lsp_dynamic_workspace_symbols<CR>", { desc = "lsp dynamic workspace symbol" })
 map("n", "<leader>b", "<cmd>Telescope git_branches<CR>", { desc = "Git Branches" })
 map("n", "<leader>tb", "<CMD>Telescope builtin<CR>", { desc = "Telescope builtins" })

@@ -6,6 +6,18 @@ require "nvchad.options"
 -- o.cursorlineopt ='both' -- to enable cursorline!
 
 local autocmd = vim.api.nvim_create_autocmd
+local group = vim.api.nvim_create_augroup('autosave', {})
+
+-- autocmd('User', {
+--     pattern = 'AutoSaveWritePost',
+--     group = group,
+--     callback = function(opts)
+--         if opts.data.saved_buffer ~= nil then
+--             local filename = vim.api.nvim_buf_get_name(opts.data.saved_buffer)
+--             print('AutoSave: saved ' .. filename .. ' at ' .. vim.fn.strftime('%H:%M:%S'))
+--         end
+--     end,
+-- })
 
 vim.filetype.add {
     extension = {

@@ -44,6 +44,8 @@ local servers = {
   "mdx_analyzer",
   "marksman",
   "svelte",
+  -- add python lsp
+  "pyright",
   -- "tailwindcss",
 }
 

@@ -16,7 +16,7 @@ require("typescript-tools").setup {
   },
   settings = {
     -- spawn additional tsserver instance to calculate diagnostics on it
-    separate_diagnostic_server = false,
+    separate_diagnostic_server = true,
     -- "change"|"insert_leave" determine when the client asks the server about diagnostic
     publish_diagnostic_on = "insert_leave",
     -- array of strings("fix_all"|"add_missing_imports"|"remove_unused"|
@@ -29,7 +29,7 @@ require("typescript-tools").setup {
     tsserver_path = nil,
     -- this value is passed to: https://nodejs.org/api/cli.html#--max-old-space-sizesize-in-megabytes
     -- memory limit in megabytes or "auto"(basically no limit)
-    tsserver_max_memory = "1536",
+    tsserver_max_memory = "auto",
     -- described below
     complete_function_calls = false,
     include_completions_with_insert_text = false,
