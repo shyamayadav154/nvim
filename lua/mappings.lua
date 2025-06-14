@@ -3,6 +3,13 @@ require "nvchad.mappings"
 local map = vim.keymap.set
 local nomap = vim.keymap.del
 
+-- claude code keymaps
+
+map("n", "<leader>cc", "<cmd>ClaudeCode<CR>", { desc = "Open Claude Code" })
+map("n", "<leader>cC", "<cmd>ClaudeCodeContinue<CR>", { desc = "Open Claude Code" })
+
+
+
 map("n", "<leader>lq", function()
   vim.cmd [[set makeprg=eslint\ -f\ unix\ --quiet\ . ]]
   vim.cmd [[silent! make]]
@@ -36,6 +43,10 @@ map("n", "<leader>gw", LiveGrepGitStatus, { desc = "Live Grep on Git Status" })
 require("hlslens").setup()
 
 local kopts = { noremap = true, silent = true }
+
+-- avante chat keymap
+map("n", "<leader>an", "<cmd>AvanteChat<CR>", { desc = "Open Avante Chat" })
+
 
 -- vim.keymap.set("n", "<Leader>l", "<Cmd>noh<CR>", kopts)
 
@@ -96,22 +107,22 @@ map("n", "<leader>S", '<cmd>lua require("spectre").toggle()<CR>', {
   desc = "Toggle Spectre",
 })
 
-map("n", "<leader>cco", function()
-  local input = vim.fn.input "Quick Chat: "
-  if input ~= "" then
-    require("CopilotChat").ask(input, { selection = require("CopilotChat.select").buffer })
-  end
-end, { desc = "Quick Chat" })
+-- map("n", "<leader>cco", function()
+--   local input = vim.fn.input "Quick Chat: "
+--   if input ~= "" then
+--     require("CopilotChat").ask(input, { selection = require("CopilotChat.select").buffer })
+--   end
+-- end, { desc = "Quick Chat" })
 
-map("n", "<leader>tch", function()
-  local actions = require "CopilotChat.actions"
-  require("CopilotChat.integrations.telescope").pick(actions.help_actions())
-end, { desc = "Copilot help action" })
+-- map("n", "<leader>tch", function()
+--   local actions = require "CopilotChat.actions"
+--   require("CopilotChat.integrations.telescope").pick(actions.help_actions())
+-- end, { desc = "Copilot help action" })
 
-map("n", "<leader>tcp", function()
-  local actions = require "CopilotChat.actions"
-  require("CopilotChat.integrations.telescope").pick(actions.prompt_actions())
-end, { desc = "Copilot prompt action" })
+-- map("n", "<leader>tcp", function()
+--   local actions = require "CopilotChat.actions"
+--   require("CopilotChat.integrations.telescope").pick(actions.prompt_actions())
+-- end, { desc = "Copilot prompt action" })
 
 -- another text
 
@@ -227,7 +238,7 @@ map("n", "gT", ":lua require('nvchad.tabufline').move_buf(-1)<CR>", { silent = t
 map("n", "gt", ":lua require('nvchad.tabufline').move_buf(1)<CR>", { silent = true, desc = "Move to next buffer" })
 
 -- lsp related
-map("n", "<leader>o", "<CMD>OrganizeImports<CR>", { desc = "Organize imports tss lsp" })
+-- map("n", "<leader>o", "<CMD>OrganizeImports<CR>", { desc = "Organize imports tss lsp" })
 map("n", "<leader>e", "<cmd>NvimTreeToggle<CR>", { desc = "Toggle NvimTree" })
 map("n", "<leader>lr", ":LspRestart<CR>", { desc = "Restart LSP" })
 
@@ -255,6 +266,8 @@ map(
   ":%s/\\<<C-r><C-w>\\>/<C-r><C-w>/gI<Left><Left><Left>",
   { desc = "replace word under cursor in current file" }
 )
+-- code action
+map("n", "<leader>ca", "<cmd>lua vim.lsp.buf.code_action()<CR>", { desc = "code action", noremap = true, silent = true })
 -- map("n", "<leader>p", '"+p', { desc = "Paste from system clipboard" })
 map("n", "<leader>co", ":%bd|e#<CR>", { desc = "close other buffers" })
 -- map("n", "<C-h>", "<cmd> TmuxNavigateLeft<CR>", { desc = "window left" })

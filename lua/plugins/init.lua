@@ -7,6 +7,29 @@ return {
   -- { import = "nvcommunity.editor.autosave" },
   { import = "nvcommunity.editor.treesittercontext" },
   {
+    "greggh/claude-code.nvim",
+    dependencies = {
+      "nvim-lua/plenary.nvim", -- Required for git operations
+    },
+    cmd = {"ClaudeCode", "ClaudeCodeContinue", "ClaudeCodeResume", "ClaudeCodeVerbose"},
+    opts={},
+    config = function()
+      require "configs.claude-code"
+    end,
+  },
+  -- {
+  --   "rmagatti/auto-session",
+  --   lazy = false,
+  --
+  --   ---enables autocomplete for opts
+  --   ---@module "auto-session"
+  --   ---@type AutoSession.Config
+  --   opts = {
+  --     suppressed_dirs = { "~/", "~/Projects", "~/Downloads", "/" },
+  --     -- log_level = 'debug',
+  --   },
+  -- },
+  {
     "ravitemer/mcphub.nvim",
     dependencies = {
       "nvim-lua/plenary.nvim", -- Required for Job and HTTP requests
@@ -21,6 +44,11 @@ return {
     -- end,
     opts = {
       auto_approve = true, -- Auto approve mcp tool calls
+      extensions = {
+        avante = {
+          make_slash_commands = true, -- make /slash commands from MCP server prompts
+        },
+      },
     },
   },
   {
@@ -135,122 +163,24 @@ return {
   {
     "yetone/avante.nvim",
     event = "VeryLazy",
-    lazy = false,
     version = false, -- set this if you want to always pull the latest change
-    opts = {
-      disabled_tools = {
-        "list_files",
-        "search_files",
-        "read_file",
-        "create_file",
-        "rename_file",
-        "delete_file",
-        "create_dir",
-        "rename_dir",
-        "delete_dir",
-        "bash",
-      },
-      system_prompt = function()
-        local hub = require("mcphub").get_hub_instance()
-        return hub:get_active_servers_prompt()
-      end,
-      -- The custom_tools type supports both a list and a function that returns a list. Using a function here prevents requiring mcphub before it's loaded
-      custom_tools = function()
-        return {
-          require("mcphub.extensions.avante").mcp_tool(),
-        }
-      end,
-      ---@alias Provider "claude" | "openai" | "azure" | "gemini" | "cohere" | "copilot" | string
-      provider = "copilot", -- Recommend using Claude
-      auto_suggestions_provider = "copilot",
-      -- gemini = {
-      --   endpoint = "https://generativelanguage.googleapis.com/v1beta/models",
-      --   model = "gemini-1.5-flash-002",
-      --   timeout = 30000, -- Timeout in milliseconds
-      --   temperature = 0,
-      --   max_tokens = 4096,
-      --   ["local"] = false,
-      -- },
-      copilot = {
-        endpoint = "https://api.githubcopilot.com",
-        model = "gpt-4o-2024-05-13",
-        proxy = nil, -- [protocol://]host[:port] Use this proxy
-        allow_insecure = false, -- Allow insecure server connections
-        timeout = 30000, -- Timeout in milliseconds
-        temperature = 0,
-        max_tokens = 4096,
-      },
-      behaviour = {
-        auto_suggestions = false, -- Experimental stage
-        auto_set_highlight_group = true,
-        auto_set_keymaps = true,
-        auto_apply_diff_after_generation = false,
-        support_paste_from_clipboard = false,
-      },
-      mappings = {
-        --- @class AvanteConflictMappings
-        diff = {
-          ours = "co",
-          theirs = "ct",
-          all_theirs = "ca",
-          both = "cb",
-          cursor = "cc",
-          next = "]x",
-          prev = "[x",
-        },
-        suggestion = {
-          accept = "<M-k>",
-          next = "<M-]>",
-          prev = "<M-[>",
-          dismiss = "<C-]>",
-        },
-        jump = {
-          next = "]]",
-          prev = "[[",
-        },
-        submit = {
-          normal = "<CR>",
-          insert = "<C-s>",
-        },
-        sidebar = {
-          switch_windows = "<Tab>",
-          reverse_switch_windows = "<S-Tab>",
-        },
-      },
-      hints = { enabled = true },
-      windows = {
-        ---@type "right" | "left" | "top" | "bottom"
-        position = "right", -- the position of the sidebar
-        wrap = true, -- similar to vim.o.wrap
-        width = 35, -- default % based on available width
-        sidebar_header = {
-          align = "center", -- left, center, right for title
-          rounded = true,
-        },
-      },
-      highlights = {
-        ---@type AvanteConflictHighlights
-        diff = {
-          current = "DiffText",
-          incoming = "DiffAdd",
-        },
-      },
-      --- @class AvanteConflictUserConfig
-      diff = {
-        autojump = true,
-        ---@type string | fun(): any
-        list_opener = "copen",
-      },
-    },
+    opts = {},
+    config = function()
+      require "configs.avante"
+    end,
     -- if you want to build from source then do `make BUILD_FROM_SOURCE=true`
     build = "make",
     -- build = "powershell -ExecutionPolicy Bypass -File Build.ps1 -BuildFromSource false" -- for windows
     dependencies = {
+      "nvim-treesitter/nvim-treesitter",
       "stevearc/dressing.nvim",
       "nvim-lua/plenary.nvim",
       "MunifTanjim/nui.nvim",
-      "ravitemer/mcphub.nvim",
       --- The below dependencies are optional,
+      "echasnovski/mini.pick", -- for file_selector provider mini.pick
+      "nvim-telescope/telescope.nvim", -- for file_selector provider telescope
+      "hrsh7th/nvim-cmp", -- autocompletion for avante commands and mentions
+      "ibhagwan/fzf-lua", -- for file_selector provider fzf
       "nvim-tree/nvim-web-devicons", -- or echasnovski/mini.icons
       "zbirenbaum/copilot.lua", -- for providers='copilot'
       {
@@ -357,27 +287,27 @@ return {
   --     require("tsw").setup(opts)
   --   end,
   -- },
-  {
-    -- enabled = false,
-    "supermaven-inc/supermaven-nvim",
-    event = "InsertEnter",
-    config = function()
-      require("supermaven-nvim").setup {
-        keymaps = {
-          accept_suggestion = "<M-l>",
-          clear_suggestion = "<C-]>",
-          accept_word = "<M-j>",
-        },
-        ignore_filetypes = { cpp = true },
-        color = {
-          suggestion_color = "#ffffff",
-          cterm = 244,
-        },
-        disable_inline_completion = false, -- disables inline completion for use with cmp
-        disable_keymaps = false, -- disables built in keymaps for more manual control
-      }
-    end,
-  },
+  -- {
+  --   -- enabled = false,
+  --   "supermaven-inc/supermaven-nvim",
+  --   event = "InsertEnter",
+  --   config = function()
+  --     require("supermaven-nvim").setup {
+  --       keymaps = {
+  --         accept_suggestion = "<M-l>",
+  --         clear_suggestion = "<C-]>",
+  --         accept_word = "<M-j>",
+  --       },
+  --       ignore_filetypes = { cpp = true },
+  --       color = {
+  --         suggestion_color = "#ffffff",
+  --         cterm = 244,
+  --       },
+  --       disable_inline_completion = false, -- disables inline completion for use with cmp
+  --       disable_keymaps = false, -- disables built in keymaps for more manual control
+  --     }
+  --   end,
+  -- },
   {
     "kevinhwang91/nvim-hlslens",
     event = "VeryLazy",
@@ -791,7 +721,7 @@ return {
   },
   -- {
   --   "CopilotC-Nvim/CopilotChat.nvim",
-  --   cmd = {'CopilotChatOpen'},
+  --   cmd = { "CopilotChatOpen" },
   --   dependencies = {
   --     { "zbirenbaum/copilot.lua" }, -- or zbirenbaum/copilot.lua
   --     { "nvim-lua/plenary.nvim", branch = "master" }, -- for curl, log and async functions
@@ -802,37 +732,37 @@ return {
   --   },
   --   -- See Commands section for default commands if you want to lazy load on them
   -- },
-  -- {
-  --   "zbirenbaum/copilot.lua",
-  --   cmd = "Copilot",
-  --   event = "InsertEnter",
-  --   opts = {
-  --     filetypes = {
-  --       yaml = true,
-  --       markdown = true,
-  --       help = false,
-  --       gitcommit = false,
-  --       gitrebase = false,
-  --       hgcommit = false,
-  --       svn = false,
-  --       cvs = false,
-  --       ["."] = false,
-  --     },
-  --     suggestion = {
-  --       auto_trigger = true,
-  --       debounce = 10,
-  --       hide_during_completion = true,
-  --       keymap = {
-  --         accept = "<M-l>",
-  --         accept_word = "<M-j>",
-  --         accept_line = false,
-  --         next = "<M-]>",
-  --         prev = "<M-[>",
-  --         dismiss = "<C-]>",
-  --       },
-  --     },
-  --   },
-  -- },
+  {
+    "zbirenbaum/copilot.lua",
+    cmd = "Copilot",
+    event = "InsertEnter",
+    opts = {
+      filetypes = {
+        yaml = true,
+        markdown = true,
+        help = false,
+        gitcommit = false,
+        gitrebase = false,
+        hgcommit = false,
+        svn = false,
+        cvs = false,
+        ["."] = false,
+      },
+      suggestion = {
+        auto_trigger = true,
+        debounce = 10,
+        hide_during_completion = true,
+        keymap = {
+          accept = "<M-l>",
+          accept_word = "<M-j>",
+          accept_line = false,
+          next = "<M-]>",
+          prev = "<M-[>",
+          dismiss = "<C-]>",
+        },
+      },
+    },
+  },
   {
     -- indent guess prisma mainly
     "NMAC427/guess-indent.nvim",

@@ -56,6 +56,9 @@ local sources = {
     -- Lua
     b.formatting.stylua,
 
+    b.formatting.black.with {
+        filetypes = { "python" }
+    },
 
     -- cspell.diagnostics,
     -- cspell.code_actions,
