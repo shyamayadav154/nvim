@@ -3,11 +3,76 @@ require "nvchad.mappings"
 local map = vim.keymap.set
 local nomap = vim.keymap.del
 
--- claude code keymaps
 
-map("n", "<leader>cc", "<cmd>ClaudeCode<CR>", { desc = "Open Claude Code" })
-map("n", "<leader>cC", "<cmd>ClaudeCodeContinue<CR>", { desc = "Open Claude Code" })
+nomap("n", "<leader>n") -- relative line number toggle disabled
+nomap("n", "<leader>b") -- git sign blame disabled
+-- if has keymap at leader gb then remap
 
+-- terminal keymaps remove
+nomap("n", "<leader>h")
+nomap("n", "<M-i>")
+
+-- in terminal mode double esc press should go to normal mode
+-- map("t", "<Esc><Esc>", "<C-\\><C-n>", { desc = "Go to normal mode in terminal" })
+
+map("t", "%a", function()
+  local all_buffers = vim.api.nvim_list_bufs()
+  print(vim.inspect(all_buffers))
+  local buffer_list = {}
+  for _, buf in ipairs(all_buffers) do
+    if vim.api.nvim_buf_is_loaded(buf) then
+      local name = vim.api.nvim_buf_get_name(buf)
+      local relative_name = vim.fn.fnamemodify(name, ":~:.")
+      -- local full_path = vim.fn.fnamemodify(name, ":p")
+      -- ignore if term
+      if name:find "term://" then
+        goto continue
+      end
+      if name ~= "" then
+        -- echo
+        vim.cmd("ClaudeCodeAdd " .. relative_name)
+        -- vim.cmd("echo 'Buffer: " .. relative_name .. "'")
+        table.insert(buffer_list, relative_name)
+      end
+    end
+    ::continue::
+  end
+  print("Added buffers to Claude Code: " .. table.concat(buffer_list, ", "))
+
+end, { desc = "Add opened buffer files to claude code" })
+
+-- Add this to your init.lua or a separate config file
+map("t", "%%", function()
+  local buffers = vim.api.nvim_list_bufs()
+  local current_buf = vim.api.nvim_get_current_buf()
+  local last_buffer = nil
+
+  -- Find the most recently used buffer that isn't the current one and isn't a terminal
+  for _, buf in ipairs(buffers) do
+    if vim.api.nvim_buf_is_loaded(buf) and buf ~= current_buf then
+      local buf_name = vim.api.nvim_buf_get_name(buf)
+      local buf_type = vim.api.nvim_buf_get_option(buf, "buftype")
+
+      -- Skip terminal buffers and other special buffer types
+      if buf_type ~= "terminal" and buf_type ~= "nofile" and buf_name ~= "" then
+        local last_used = vim.fn.getbufinfo(buf)[1].lastused
+        if not last_buffer or last_used > vim.fn.getbufinfo(last_buffer)[1].lastused then
+          last_buffer = buf
+        end
+      end
+    end
+  end
+
+  if last_buffer then
+    local buf_name = vim.api.nvim_buf_get_name(last_buffer)
+    local relative_name = vim.fn.fnamemodify(buf_name, ":~:.") -- Get relative path
+    vim.cmd("ClaudeCodeAdd " .. relative_name)
+    -- local short_name = vim.fn.fnamemodify(buf_name, ":t") -- Get just the filename
+    -- print("Last viewed buffer: " .. short_name .. " (Buffer #" .. last_buffer .. ")")
+  else
+    print "No previous buffer found"
+  end
+end, { desc = "Add last viewed viewed buffer to claude code" })
 
 
 map("n", "<leader>lq", function()
@@ -24,21 +89,21 @@ map("n", "<leader>lf", function()
   vim.diagnostic.open_float()
 end, { desc = "Show diagnostic under the cursor" })
 
-local builtin = require "telescope.builtin"
-local actions = require "telescope.actions"
+-- local builtin = require "telescope.builtin"
+-- local actions = require "telescope.actions"
 
 -- Custom function to grep through git status files
-function LiveGrepGitStatus()
-  local git_files = vim.fn.systemlist "git status --porcelain | awk '{print $2}'"
-  -- print
-  print(git_files)
-  builtin.live_grep {
-    search_dirs = git_files,
-    prompt_title = "Live Grep on Git Status",
-  }
-end
-
-map("n", "<leader>gw", LiveGrepGitStatus, { desc = "Live Grep on Git Status" })
+-- function LiveGrepGitStatus()
+--   local git_files = vim.fn.systemlist "git status --porcelain | awk '{print $2}'"
+--   -- print
+--   print(git_files)
+--   builtin.live_grep {
+--     search_dirs = git_files,
+--     prompt_title = "Live Grep on Git Status",
+--   }
+-- end
+--
+-- map("n", "<leader>gw", LiveGrepGitStatus, { desc = "Live Grep on Git Status" })
 
 require("hlslens").setup()
 
@@ -46,7 +111,6 @@ local kopts = { noremap = true, silent = true }
 
 -- avante chat keymap
 map("n", "<leader>an", "<cmd>AvanteChat<CR>", { desc = "Open Avante Chat" })
-
 
 -- vim.keymap.set("n", "<Leader>l", "<Cmd>noh<CR>", kopts)
 
@@ -62,14 +126,6 @@ map("n", "zK", function()
     vim.lsp.buf.hover()
   end
 end)
-
-nomap("n", "<leader>n") -- relative line number toggle disabled
-nomap("n", "<leader>b") -- git sign blame disabled
--- if has keymap at leader gb then remap
-
--- terminal keymaps remove
-nomap("n", "<leader>h")
-nomap("n", "<M-i>")
 
 -- delete console from current page
 map("n", "<leader>cd", "<cmd>g/console/norm dd<CR>", { desc = "Delete console from current file/buffer" })
@@ -176,6 +232,8 @@ map("n", "gj", "<C-w>j", { desc = "Go to window below" })
 map("n", "gk", "<C-w>k", { desc = "Go to window above" })
 map("n", "gH", "<C-w>h", { desc = "Go to window left" })
 map("n", "gL", "<C-w>l", { desc = "Go to window right" })
+-- move to the window on the left
+map({ "n", "t" }, "<C-h>", "<C-w>h", { desc = "Go to window left" })
 
 -- Keymap for LSP references
 map("n", "gr", "<cmd>lua vim.lsp.buf.references()<CR>", { desc = "LSP References in quickfix" })
@@ -208,7 +266,6 @@ map("n", "<leader>fo", function()
     cwd_only = true,
   }
 end, { desc = "Find old files in current directory" })
-
 
 map("n", "<leader>gf", "<CMD>Telescop git_status<CR>", { desc = "git status" })
 map("n", "<leader>fr", "<CMD>Telescope lsp_references<CR>", { desc = "telescope lsp references" })
@@ -267,7 +324,12 @@ map(
   { desc = "replace word under cursor in current file" }
 )
 -- code action
-map("n", "<leader>ca", "<cmd>lua vim.lsp.buf.code_action()<CR>", { desc = "code action", noremap = true, silent = true })
+map(
+  "n",
+  "<leader>ca",
+  "<cmd>lua vim.lsp.buf.code_action()<CR>",
+  { desc = "code action", noremap = true, silent = true }
+)
 -- map("n", "<leader>p", '"+p', { desc = "Paste from system clipboard" })
 map("n", "<leader>co", ":%bd|e#<CR>", { desc = "close other buffers" })
 -- map("n", "<C-h>", "<cmd> TmuxNavigateLeft<CR>", { desc = "window left" })
@@ -284,9 +346,9 @@ map("n", "<A-t>", ":lua require('nvterm.terminal').toggle 'horizontal'<CR>", { d
 -- Harpoon keymaps
 map(
   "n",
-  "<leader>a",
+  "<leader>ha",
   "<CMD> lua require('harpoon.mark').add_file()<CR>",
-  { desc = "Add file to harpoon menu", silent = true }
+  { desc = "harpoon add a file", silent = true }
 )
 map(
   "n",

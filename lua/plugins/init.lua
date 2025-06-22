@@ -4,19 +4,113 @@ return {
   { import = "nvcommunity.git.lazygit" },
   { import = "nvcommunity.editor.treesj" },
   { import = "nvcommunity.motion.harpoon" },
-  -- { import = "nvcommunity.editor.autosave" },
   { import = "nvcommunity.editor.treesittercontext" },
   {
-    "greggh/claude-code.nvim",
+    "linux-cultist/venv-selector.nvim",
     dependencies = {
-      "nvim-lua/plenary.nvim", -- Required for git operations
+      "neovim/nvim-lspconfig",
+      "mfussenegger/nvim-dap",
+      "mfussenegger/nvim-dap-python", --optional
+      { "nvim-telescope/telescope.nvim", branch = "0.1.x", dependencies = { "nvim-lua/plenary.nvim" } },
     },
-    cmd = {"ClaudeCode", "ClaudeCodeContinue", "ClaudeCodeResume", "ClaudeCodeVerbose"},
-    opts={},
-    config = function()
-      require "configs.claude-code"
-    end,
+    lazy = false,
+    branch = "regexp", -- This is the regexp branch, use this for the new version
+    keys = {
+      { ",v", "<cmd>VenvSelect<cr>" },
+    },
+    ---@type venv-selector.Config
+    opts = {
+      -- Your settings go here
+    },
   },
+  {
+    "folke/snacks.nvim",
+    priority = 1000,
+    lazy = false,
+    ---@type snacks.Config
+    opts = {
+      -- your configuration comes here
+      -- or leave it empty to use the default settings
+      -- refer to the configuration section below
+      bigfile = { enabled = true },
+      -- animate = { enabled = true },
+      terminal = { enabled = true },
+      scope = { enabled = true },
+      dim = { enabled = true },
+      -- dashboard = { enabled = true },
+      -- explorer = { enabled = true },
+      -- indent = { enabled = true },
+      -- input = { enabled = true },
+      -- picker = { enabled = true },
+      -- notifier = { enabled = true },
+      quickfile = { enabled = true },
+      -- scope = { enabled = true },
+      -- scroll = { enabled = true },
+      -- statuscolumn = { enabled = true },
+      -- words = { enabled = true },
+    },
+  },
+  {
+    "coder/claudecode.nvim",
+    -- event = "BufReadPre",
+    dependencies = {
+      "folke/snacks.nvim", -- optional
+    },
+    -- config = true,
+    opts = {
+      -- Diff Integration
+      diff_opts = {
+        auto_close_on_accept = true, -- Close diff view after accepting changes
+        show_diff_stats = false, -- Show diff statistics
+        vertical_split = false, -- Use vertical split for diffs
+        -- open_in_current_tab = true, -- Open diffs in current tab vs new tab
+      },
+      -- Terminal Configuration
+      terminal = {
+        split_side = "right", -- "left" or "right"
+        split_width_percentage = 0.35, -- Width as percentage (0.0 to 1.0)
+        provider = "snacks", -- "auto", "snacks", or "native"
+        show_native_term_exit_tip = false, -- Show exit tip for native terminal
+        auto_close = false, -- Auto-close terminal after command completion
+      },
+    },
+    keys = {
+      { "<leader>a", nil, desc = "AI/Claude Code" },
+      { "<leader>ac", "<cmd>ClaudeCode --continue <cr>", mode = { "n" }, desc = "Toggle Claude" },
+      { "<leader>do", "<cmd>ClaudeCode --continue <cr>", mode = { "n" }, desc = "Toggle Claude" },
+      { "<C-,>", "<cmd>ClaudeCode --continue <cr>", mode = { "t" }, desc = "Toggle Claude" },
+      { "<leader>af", "<cmd>ClaudeCodeFocus<cr>", mode = { "n", "v" }, desc = "Focus Claude" },
+      { "<C-,>", "<cmd>ClaudeCodeFocus<cr>", mode = { "t" }, desc = "Focus Claude" },
+      { "<leader>ar", "<cmd>ClaudeCode --resume<cr>", desc = "Resume Claude" },
+      { "<leader>aC", "<cmd>ClaudeCode --continue --dangerously-skip-permissions<cr>", desc = "Continue Claude" },
+      { "<leader>as", "<cmd>ClaudeCodeSend<cr>", mode = "v", desc = "Send to Claude" },
+      {
+        "<leader>as",
+        "<cmd>ClaudeCodeTreeAdd<cr>",
+        desc = "Add file",
+        ft = { "NvimTree", "neo-tree", "oil" },
+      },
+
+      -- Customize diff keymaps to avoid conflicts (e.g., with debugger)
+      { "<leader>ya", "<cmd>ClaudeCodeDiffAccept<cr>", desc = "Accept diff" },
+      { "<leader>yn", "<cmd>ClaudeCodeDiffDeny<cr>", desc = "Deny diff" },
+      -- Diff management
+      -- { "<leader>aa", "<cmd>ClaudeCodeDiffAccept<cr>", desc = "Accept diff" },
+      -- { "<leader>ad", "<cmd>ClaudeCodeDiffDeny<cr>", desc = "Deny diff" },
+    },
+  },
+  -- {
+  --   "greggh/claude-code.nvim",
+  --   dependencies = {
+  --     "nvim-lua/plenary.nvim", -- Required for git operations
+  --   },
+  --   event = "VeryLazy",
+  --   -- cmd = {"ClaudeCode", "ClaudeCodeContinue", "ClaudeCodeResume", "ClaudeCodeVerbose"},
+  --   opts = {},
+  --   config = function()
+  --     require "configs.claude-code"
+  --   end,
+  -- },
   -- {
   --   "rmagatti/auto-session",
   --   lazy = false,
@@ -92,6 +186,13 @@ return {
     "okuuva/auto-save.nvim",
     event = { "InsertLeave", "TextChanged" },
     opts = {
+      condition = function()
+        -- check if in nvim diff mode
+        if vim.opt.diff:get() then
+          return false
+        end
+        return true
+      end,
       callbacks = {
         before_saving = function()
           -- save global autoformat status
@@ -437,9 +538,10 @@ return {
   },
   {
     "sindrets/diffview.nvim",
-    event = "BufRead",
-    cmd = "DiffviewOpen",
+    event = "VeryLazy",
+    -- cmd = "DiffviewOpen",
     opts = {
+      DiffviewOpen = { "--imply-local" },
       view = {
         -- For more info, see ':h diffview-config-view.x.layout'.
         default = {

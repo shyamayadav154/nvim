@@ -2,7 +2,7 @@ local present, null_ls = pcall(require, "null-ls")
 -- local cspell = require('cspell')
 
 if not present then
-    return
+  return
 end
 
 local b = null_ls.builtins
@@ -25,46 +25,61 @@ local b = null_ls.builtins
 --     }
 -- })
 
-
 local sources = {
 
-    -- webdev stuff
-    b.formatting.prettier.with {
-        filetypes = { "html", "json", "yaml", "markdown", "css", "scss", "less", "javascript", "javascriptreact", "typescript", "typescriptreact", "vue", "svelte" },
+  -- webdev stuff
+  b.formatting.prettier.with {
+    filetypes = {
+      "html",
+      -- "json",
+      "yaml",
+      "markdown",
+      "css",
+      "scss",
+      "less",
+      "javascript",
+      "javascriptreact",
+      "typescript",
+      "typescriptreact",
+      "vue",
+      "svelte",
     },
-    -- b.formatting.prettierd,
+  },
+  -- b.formatting.prettierd,
 
-    b.diagnostics.zsh,
-    b.formatting.shfmt,
-    -- b.diagnostics.markdownlint,
-    -- b.formatting.markdownlint,
+  b.diagnostics.zsh,
+  b.formatting.shfmt,
+  -- b.diagnostics.markdownlint,
+  -- b.formatting.markdownlint,
 
-    -- b.formatting.yamlfmt,
+  -- b.formatting.yamlfmt,
 
-    -- b.diagnostics.dotenv_linter,
+  -- b.diagnostics.dotenv_linter,
 
-    -- b.diagnostics.editorconfig_checker,
-    b.code_actions.refactoring,
+  -- b.diagnostics.editorconfig_checker,
+  b.code_actions.refactoring,
 
-    --codespell
-    -- b.diagnostics.codespell,
-    -- b.formatting.codespell,
+  --codespell
+  -- b.diagnostics.codespell,
+  -- b.formatting.codespell,
 
-    -- b.completion.spell,
-    -- b.completion.tags,
+  -- b.completion.spell,
+  -- b.completion.tags,
 
-    -- Lua
-    b.formatting.stylua,
+  -- Lua
+  b.formatting.stylua,
 
-    b.formatting.black.with {
-        filetypes = { "python" }
-    },
+  -- b.diagnostics.ruff,
+  -- b.formatting.ruff_format,
+  -- b.formatting.black.with {
+  --     filetypes = { "python" }
+  -- },
 
-    -- cspell.diagnostics,
-    -- cspell.code_actions,
+  -- cspell.diagnostics,
+  -- cspell.code_actions,
 }
 
 null_ls.setup {
-    debug = true,
-    sources = sources,
+  debug = true,
+  sources = sources,
 }

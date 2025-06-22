@@ -56,10 +56,10 @@ M.ui = {
         local final_name = " " .. new_name .. " "
         return "%#St_file# " .. final_name .. "%#St_file_sep#" .. sep_r
       end,
-      lsp_msg = function()
-        -- to enable fidget to work
-        require("lsp-status").status()
-      end,
+      -- lsp_msg = function()
+      --   -- to enable fidget to work
+      --   require("lsp-status").status()
+      -- end,
       -- The default cursor module is override
       cursor = function()
         local sep_l = ""
