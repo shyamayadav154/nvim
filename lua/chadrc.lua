@@ -18,6 +18,21 @@ end
 
 local sep_r = separators["right"]
 
+local function get_git_branch(max_length)
+  local git_cmd = io.popen "git branch --show-current 2>/dev/null"
+  if git_cmd then
+    local branch = git_cmd:read "*l"
+    git_cmd:close()
+    if branch and branch ~= "" then
+      if max_length and #branch > max_length then
+        branch = branch:sub(1, max_length - 3) .. "..."
+      end
+      return branch
+    end
+  end
+  return nil
+end
+
 M.ui = {
   theme = "onedark",
 
@@ -56,15 +71,22 @@ M.ui = {
         local final_name = " " .. new_name .. " "
         return "%#St_file# " .. final_name .. "%#St_file_sep#" .. sep_r
       end,
-      -- lsp_msg = function()
-      --   -- to enable fidget to work
-      --   require("lsp-status").status()
-      -- end,
+      lsp_msg = function()
+        -- to enable fidget to work
+        -- require("lsp-status").status()
+      end,
       -- The default cursor module is override
       cursor = function()
         local sep_l = ""
         local text = "%2l:%-2v %2L "
         return "%#St_pos_sep#" .. sep_l .. "%#St_pos_icon# %#St_pos_text# " .. text
+      end,
+      git = function()
+        local branch = get_git_branch(50)
+        if branch then
+          return "%#St_gitIcons#  " .. branch .. " "
+        end
+        return ""
       end,
     },
   },
@@ -85,15 +107,8 @@ M.nvdash = {
     -- Get just the folder name
     local folder_name = vim.fn.fnamemodify(cwd, ":t")
 
-    local git_branch = ""
-    local git_cmd = io.popen "git branch --show-current 2>/dev/null"
-    if git_cmd then
-      local branch = git_cmd:read "*l"
-      git_cmd:close()
-      if branch and branch ~= "" then
-        git_branch = "  " .. branch
-      end
-    end
+    local branch = get_git_branch(50)
+    local git_branch = branch and ("  " .. branch) or ""
 
     return {
       --  "     ▄▄         ▄ ▄▄▄▄▄▄▄   ",

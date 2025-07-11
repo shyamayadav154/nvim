@@ -2,9 +2,82 @@ return {
   "NvChad/nvcommunity",
   { import = "nvcommunity.tools.telescope-fzf-native" },
   { import = "nvcommunity.git.lazygit" },
-  { import = "nvcommunity.editor.treesj" },
   { import = "nvcommunity.motion.harpoon" },
   { import = "nvcommunity.editor.treesittercontext" },
+  {
+    "iamcco/markdown-preview.nvim",
+    cmd = { "MarkdownPreviewToggle", "MarkdownPreview", "MarkdownPreviewStop" },
+    ft = { "markdown" },
+    build = "cd app && npm install",
+  },
+
+  -- { import = "nvcommunity.motion.neoscroll" },
+  -- {
+  --   "karb94/neoscroll.nvim",
+  --   keys = {
+  --     -- Keys to be mapped to their corresponding default scrolling animation
+  --     "<C-u>",
+  --     "<C-d>",
+  --     "<C-b>",
+  --     "<C-f>",
+  --     "<C-y>",
+  --     "<C-e>",
+  --     "zt",
+  --     "zz",
+  --     "zb",
+  --   },
+  --   opts = {
+  --     enable = false, -- Enable scrolling animations
+  --     mappings = { -- Keys to be mapped to their corresponding default scrolling animation
+  --       "<C-u>",
+  --       "<C-d>",
+  --       "<C-b>",
+  --       "<C-f>",
+  --       "<C-y>",
+  --       "<C-e>",
+  --       "zt",
+  --       "zz",
+  --       "zb",
+  --     },
+  --     ignored_events = { -- Events ignored while scrolling
+  --       "WinScrolled",
+  --       "CursorMoved",
+  --     },
+  --   },
+  -- },
+  {
+    event = "VeryLazy",
+    "sphamba/smear-cursor.nvim",
+    opts = {
+
+      time_interval = 7, -- milliseconds
+      enabled = false,
+      stiffness = 0.8, -- 0.6      [0, 1]
+      trailing_stiffness = 0.5, -- 0.4      [0, 1]
+      stiffness_insert_mode = 0.7, -- 0.5      [0, 1]
+      trailing_stiffness_insert_mode = 0.7, -- 0.5      [0, 1]
+      damping = 0.8, -- 0.65     [0, 1]
+      damping_insert_mode = 0.8, -- 0.7      [0, 1]
+      distance_stop_animating = 0.5,
+      -- Smear cursor when switching buffers or windows.
+      smear_between_buffers = true,
+
+      -- Smear cursor when moving within line or to neighbor lines.
+      -- Use `min_horizontal_distance_smear` and `min_vertical_distance_smear` for finer control
+      smear_between_neighbor_lines = true,
+
+      -- Draw the smear in buffer space instead of screen space when scrolling
+      scroll_buffer_space = true,
+
+      -- Set to `true` if your font supports legacy computing symbols (block unicode symbols).
+      -- Smears will blend better on all backgrounds.
+      legacy_computing_symbols_support = false,
+
+      -- Smear cursor in insert mode.
+      -- See also `vertical_bar_cursor_insert_mode` and `distance_stop_animating_vertical_bar`.
+      smear_insert_mode = true,
+    },
+  },
   {
     "linux-cultist/venv-selector.nvim",
     dependencies = {
@@ -34,9 +107,10 @@ return {
       -- refer to the configuration section below
       bigfile = { enabled = true },
       -- animate = { enabled = true },
-      terminal = { enabled = true },
-      scope = { enabled = true },
-      dim = { enabled = true },
+      -- terminal = { enabled = true},
+      -- scope = { enabled = true },
+      -- dim = { enabled = true },
+      -- git = { enabled = true },
       -- dashboard = { enabled = true },
       -- explorer = { enabled = true },
       -- indent = { enabled = true },
@@ -48,6 +122,27 @@ return {
       -- scroll = { enabled = true },
       -- statuscolumn = { enabled = true },
       -- words = { enabled = true },
+      -- image
+      image = {
+        -- define these here, so that we don't need to load the image module
+        formats = {
+          "png",
+          "jpg",
+          "jpeg",
+          "gif",
+          "bmp",
+          "webp",
+          "tiff",
+          "heic",
+          "avif",
+          "mp4",
+          "mov",
+          "avi",
+          "mkv",
+          "webm",
+          "pdf",
+        },
+      },
     },
   },
   {
@@ -58,34 +153,31 @@ return {
     },
     -- config = true,
     opts = {
+      -- terminal_cmd = "/Users/shyam/.claude/local/node_modules/.bin/claude",
       -- Diff Integration
       diff_opts = {
         auto_close_on_accept = true, -- Close diff view after accepting changes
-        show_diff_stats = false, -- Show diff statistics
+        show_diff_stats = true, -- Show diff statistics
         vertical_split = false, -- Use vertical split for diffs
         -- open_in_current_tab = true, -- Open diffs in current tab vs new tab
       },
       -- Terminal Configuration
       terminal = {
         split_side = "right", -- "left" or "right"
-        split_width_percentage = 0.35, -- Width as percentage (0.0 to 1.0)
+        split_width_percentage = 0.36, -- Width as percentage (0.0 to 1.0)
         provider = "snacks", -- "auto", "snacks", or "native"
         show_native_term_exit_tip = false, -- Show exit tip for native terminal
-        auto_close = false, -- Auto-close terminal after command completion
+        auto_close = true, -- Auto-close terminal after command completion
       },
     },
     keys = {
-      { "<leader>a", nil, desc = "AI/Claude Code" },
-      { "<leader>ac", "<cmd>ClaudeCode --continue <cr>", mode = { "n" }, desc = "Toggle Claude" },
-      { "<leader>do", "<cmd>ClaudeCode --continue <cr>", mode = { "n" }, desc = "Toggle Claude" },
-      { "<C-,>", "<cmd>ClaudeCode --continue <cr>", mode = { "t" }, desc = "Toggle Claude" },
-      { "<leader>af", "<cmd>ClaudeCodeFocus<cr>", mode = { "n", "v" }, desc = "Focus Claude" },
-      { "<C-,>", "<cmd>ClaudeCodeFocus<cr>", mode = { "t" }, desc = "Focus Claude" },
-      { "<leader>ar", "<cmd>ClaudeCode --resume<cr>", desc = "Resume Claude" },
-      { "<leader>aC", "<cmd>ClaudeCode --continue --dangerously-skip-permissions<cr>", desc = "Continue Claude" },
-      { "<leader>as", "<cmd>ClaudeCodeSend<cr>", mode = "v", desc = "Send to Claude" },
+      { ",t", "<cmd>ClaudeCode --continue --permission-mode plan<cr>", mode = { "n", "t" }, desc = "Toggle Claude" },
+      { ",f", "<cmd>ClaudeCodeFocus<cr>", mode = { "n", "v", "t" }, desc = "Focus Claude" },
+      { ",T", "<cmd>ClaudeCode --continue --dangerously-skip-permissions<cr>", desc = "Continue Claude" },
+      { ",s", "<cmd>ClaudeCodeSend<cr>", mode = "v", desc = "Send to Claude" },
       {
-        "<leader>as",
+        -- "<leader>as",
+        ",s",
         "<cmd>ClaudeCodeTreeAdd<cr>",
         desc = "Add file",
         ft = { "NvimTree", "neo-tree", "oil" },
@@ -184,8 +276,15 @@ return {
   },
   {
     "okuuva/auto-save.nvim",
-    event = { "InsertLeave", "TextChanged" },
+    event = "VeryLazy",
     opts = {
+      enabled = true, -- start auto-save when the plugin is loaded (i.e. when your package manager loads it)
+      trigger_events = { -- See :h events
+        immediate_save = { "BufLeave", "FocusLost", "QuitPre", "VimSuspend" }, -- vim events that trigger an immediate save
+        defer_save = { "InsertLeave", "TextChanged" }, -- vim events that trigger a deferred save (saves after `debounce_delay`)
+        cancel_deferred_save = { "InsertEnter" }, -- vim events that cancel a pending deferred save
+      },
+      noautocmd = true, -- do not execute autocmds when saving
       condition = function()
         -- check if in nvim diff mode
         if vim.opt.diff:get() then
@@ -258,8 +357,16 @@ return {
     },
   },
   {
-    import = "nvcommunity.editor.treesj",
-    opts = { max_join_length = 160 },
+    "Wansmer/treesj",
+    keys = { "<leader>tt" },
+    dependencies = { "nvim-treesitter/nvim-treesitter" },
+    config = function()
+      vim.keymap.set("n", "<leader>tt", "<cmd>TSJToggle<cr>", { desc = "Toggle Treesitter Join" })
+      require("treesj").setup {--[[ your config ]]
+        max_join_length = 160,
+        use_default_keymaps = false,
+      }
+    end,
   },
   {
     "yetone/avante.nvim",
@@ -487,6 +594,7 @@ return {
       "DBUIFindBuffer",
     },
     init = function()
+      -- require("configs.dadbod").setup()
       -- Your DBUI configuration
       vim.g.db_ui_use_nerd_fonts = 1
     end,
@@ -538,10 +646,27 @@ return {
   },
   {
     "sindrets/diffview.nvim",
-    event = "VeryLazy",
+    -- lazy = false,
+    cmd = { "DiffviewOpen", "DiffviewClose", "DiffviewToggleFiles", "DiffviewFocusFiles", "DiffviewFileHistory" },
     -- cmd = "DiffviewOpen",
     opts = {
       DiffviewOpen = { "--imply-local" },
+      hooks = {
+        diff_buf_win_enter = function(bufnr, winid, ctx)
+          if ctx.layout_name:match "^diff2" then
+            if ctx.symbol == "a" then
+              vim.opt_local.winhl = table.concat({
+                "DiffAdd:DiffviewDiffAddAsDelete",
+                "DiffDelete:DiffviewDiffDelete",
+              }, ",")
+            elseif ctx.symbol == "b" then
+              vim.opt_local.winhl = table.concat({
+                "DiffDelete:DiffviewDiffDelete",
+              }, ",")
+            end
+          end
+        end,
+      },
       view = {
         -- For more info, see ':h diffview-config-view.x.layout'.
         default = {
@@ -573,18 +698,18 @@ return {
     dependencies = { "nvim-lua/plenary.nvim" },
     opts = { signs = false },
   },
-  {
-    "pmizio/typescript-tools.nvim",
-    event = "BufReadPre",
-    dependencies = {
-      "nvim-lua/plenary.nvim",
-      "neovim/nvim-lspconfig",
-    },
-    opts = {},
-    config = function()
-      require "configs.typescript-tools"
-    end,
-  },
+  -- {
+  --   "pmizio/typescript-tools.nvim",
+  --   event = "BufReadPre",
+  --   dependencies = {
+  --     "nvim-lua/plenary.nvim",
+  --     "neovim/nvim-lspconfig",
+  --   },
+  --   opts = {},
+  --   config = function()
+  --     require "configs.typescript-tools"
+  --   end,
+  -- },
   {
     "axelvc/template-string.nvim",
     event = "VeryLazy",
@@ -672,12 +797,39 @@ return {
       local telescope = require "telescope" -- no need
 
       telescope.load_extension "live_grep_args"
+      telescope.load_extension "media_files"
       -- old files on cwd only
 
+      conf.defaults.preview = {
+        mime_hook = function(filepath, bufnr, opts)
+          local is_image = function(filepath)
+            local image_extensions = { "png", "jpg" } -- Supported image formats
+            local split_path = vim.split(filepath:lower(), ".", { plain = true })
+            local extension = split_path[#split_path]
+            return vim.tbl_contains(image_extensions, extension)
+          end
+          if is_image(filepath) then
+            local term = vim.api.nvim_open_term(bufnr, {})
+            local function send_output(_, data, _)
+              for _, d in ipairs(data) do
+                vim.api.nvim_chan_send(term, d .. "\r\n")
+              end
+            end
+            vim.fn.jobstart({
+              "catimg",
+              filepath, -- Terminal image viewer command
+            }, { on_stdout = send_output, stdout_buffered = true, pty = true })
+          else
+            require("telescope.previewers.utils").set_preview_message(bufnr, opts.winid, "Binary cannot be previewed")
+          end
+        end,
+      }
       conf.defaults.mappings.n = {
         ["<C-Enter"] = actions.to_fuzzy_refine,
         ["q"] = actions.close,
         ["<C-w>"] = actions.send_selected_to_qflist + actions.open_qflist,
+        ["<C-s>"] = actions.cycle_previewers_next,
+        ["<C-a>"] = actions.cycle_previewers_prev,
       }
 
       conf.defaults.mappings.i = {
@@ -685,6 +837,7 @@ return {
         ["<C-j>"] = actions.cycle_history_next,
         ["<C-k>"] = actions.cycle_history_prev,
         ["<C-w>"] = actions.send_selected_to_qflist + actions.open_qflist,
+        -- ["<C-u>"] = false,
       }
       return conf
     end,
@@ -852,12 +1005,12 @@ return {
       },
       suggestion = {
         auto_trigger = true,
-        debounce = 10,
+        debounce = 100,
         hide_during_completion = true,
         keymap = {
           accept = "<M-l>",
           accept_word = "<M-j>",
-          accept_line = false,
+          accept_line = "<M-k>",
           next = "<M-]>",
           prev = "<M-[>",
           dismiss = "<C-]>",
@@ -899,7 +1052,6 @@ return {
   {
     "nvim-treesitter/playground",
     dependencies = "nvim-treesitter/nvim-treesitter",
-    opts = {},
   },
   {
     "nvim-treesitter/nvim-treesitter",
@@ -1008,5 +1160,16 @@ return {
         },
       },
     },
+  },
+  {
+    "nvim-telescope/telescope-media-files.nvim",
+    dependencies = {
+      "nvim-telescope/telescope.nvim",
+      "nvim-lua/popup.nvim",
+      "nvim-lua/plenary.nvim",
+    },
+    config = function()
+      require("telescope").load_extension "media_files"
+    end,
   },
 }

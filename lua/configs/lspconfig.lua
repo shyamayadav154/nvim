@@ -6,30 +6,12 @@ local capabilities = configs.capabilities
 
 local lspconfig = require "lspconfig"
 
-local function organise_imports()
-  local params = {
-    command = "_typescript.organizeImports",
-    arguments = { vim.api.nvim_buf_get_name(0) },
-    title = "",
-  }
-  vim.lsp.buf.execute_command(params)
-end
-
-local function add_missing_import()
-  local params = {
-    command = "_typescript.addMissingImports",
-    arguments = { vim.api.nvim_buf_get_name(0) },
-    title = "",
-  }
-  vim.lsp.buf.execute_command(params)
-end
-
 local servers = {
   "html",
   -- "tsserver",
   "cssls",
   "graphql",
-  "quick_lint_js",
+  -- "quick_lint_js",
   "jsonls",
   "eslint",
   "prismals",
@@ -126,69 +108,104 @@ local on_attach_tsserver = function(client, bufnr)
       callback = vim.lsp.codelens.refresh,
     })
   end
+  -- TypeScript specific commands
+  vim.keymap.set("n", "<space>oi", function()
+    vim.lsp.buf.code_action {
+      apply = true,
+      context = {
+        only = { "source.removeUnused.ts" },
+        diagnostics = {},
+      },
+    }
+  end, { buffer = bufnr, desc = "Organize Imports: remvoe unsed imports" })
+
+  -- Auto import word under cursor using nvim-cmp in normal mode
+  vim.keymap.set("n", "<leader>ai", function()
+    local word = vim.fn.expand "<cword>"
+    if word == "" then
+      vim.notify("No word under cursor", vim.log.levels.WARN)
+      return
+    end
+    -- Move to end of word and enter insert mode
+    vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("ea", true, false, true), "n", false)
+    -- Use a timer to trigger completion after entering insert mode
+    vim.defer_fn(function()
+      local cmp = require "cmp"
+      cmp.complete {
+        config = {
+          sources = {
+            { name = "nvim_lsp" }, -- Ensure nvim_lsp is available in your cmp configuration
+          },
+        },
+      }
+      cmp.confirm { select = true, behavior = cmp.ConfirmBehavior.Replace }
+
+      -- go to normal mode after completion
+      vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("<Esc>", true, false, true), "n", false)
+      vim.notify("Triggering completion for: " .. word, vim.log.levels.INFO)
+    end, 10)
+  end, { desc = "Auto import word under cursor using nvim-cmp and lsp" })
+
+  -- Add missing imports
+  -- vim.keymap.set('n', '<space>ai', function()
+  --   vim.lsp.buf.code_action({
+  --     apply = true,
+  --     context = {
+  --       only = { "source.addMissingImports.ts" },
+  --       diagnostics = {},
+  --     },
+  --   })
+  -- end, { buffer = bufnr, desc = "Add Missing Imports" })
+
   client.server_capabilities.documentFormattingProvider = false
   client.server_capabilities.documentRangeFormattingProvider = false
   on_attach(client, bufnr)
 end
 
--- lspconfig.ts_ls.setup {
---   on_attach = on_attach_tsserver,
---   on_init = on_init,
---   capabilities = capabilities,
---   init_options = {
---     preferences = {
---       disableSuggestions = false,
---       codeLens = {
---         references = true,
---         implementations = true,
---       },
---     },
---   },
---   commands = {
---     OrganizeImports = {
---       organise_imports,
---       description = "Organize Imports",
---     },
---     AddMissingImports = {
---       add_missing_import,
---       description = "Add missing imports",
---     },
---   },
---   settings = {
---     importModuleSpecifierPreference = "non-relative",
---     -- enable code lens
---     javascript = {
---       codeLens = {
---         references = true,
---         implementations = true,
---       },
---       inlayHints = {
---         -- includeInlayEnumMemberValueHints = true,
---         -- includeInlayFunctionLikeReturnTypeHints = true,
---         -- includeInlayFunctionParameterTypeHints = true,
---         includeInlayParameterNameHints = "all",
---         -- includeInlayParameterNameHintsWhenArgumentMatchesName = true,
---         -- includeInlayPropertyDeclarationTypeHints = true,
---         -- includeInlayVariableTypeHints = true,
---       },
---     },
---     typescript = {
---       codeLens = {
---         references = true,
---         implementations = true,
---       },
---       inlayHints = {
---         -- includeInlayEnumMemberValueHints = true,
---         -- includeInlayFunctionLikeReturnTypeHints = true,
---         -- includeInlayFunctionParameterTypeHints = true,
---         includeInlayParameterNameHints = "all",
---         -- includeInlayParameterNameHintsWhenArgumentMatchesName = true,
---         -- includeInlayPropertyDeclarationTypeHints = true,
---         -- includeInlayVariableTypeHints = true,
---       },
---     },
---   },
--- }
+lspconfig.ts_ls.setup {
+  on_attach = on_attach_tsserver,
+  on_init = on_init,
+  capabilities = capabilities,
+  init_options = {
+    hostInfo = "neovim",
+    preferences = {
+      includeCompletionsForModuleExports = true,
+      includeCompletionsForImportStatements = true,
+      importModuleSpecifierPreference = "non-relative",
+      includePackageJsonAutoImports = "on",
+      disableSuggestions = false,
+      codeLens = {
+        references = true,
+        implementations = true,
+      },
+    },
+  },
+  settings = {
+    -- enable code lens
+    javascript = {
+      inlayHints = {
+        -- includeInlayEnumMemberValueHints = true,
+        -- includeInlayFunctionLikeReturnTypeHints = true,
+        -- includeInlayFunctionParameterTypeHints = true,
+        includeInlayParameterNameHints = "all",
+        -- includeInlayParameterNameHintsWhenArgumentMatchesName = true,
+        -- includeInlayPropertyDeclarationTypeHints = true,
+        -- includeInlayVariableTypeHints = true,
+      },
+    },
+    typescript = {
+      inlayHints = {
+        -- includeInlayEnumMemberValueHints = true,
+        -- includeInlayFunctionLikeReturnTypeHints = true,
+        -- includeInlayFunctionParameterTypeHints = true,
+        includeInlayParameterNameHints = "all",
+        -- includeInlayParameterNameHintsWhenArgumentMatchesName = true,
+        -- includeInlayPropertyDeclarationTypeHints = true,
+        -- includeInlayVariableTypeHints = true,
+      },
+    },
+  },
+}
 
 lspconfig.lua_ls.setup {
   on_attach = on_attach,

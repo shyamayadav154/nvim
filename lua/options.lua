@@ -6,7 +6,48 @@ require "nvchad.options"
 -- o.cursorlineopt ='both' -- to enable cursorline!
 
 local autocmd = vim.api.nvim_create_autocmd
-local group = vim.api.nvim_create_augroup("autosave", {})
+
+vim.api.nvim_create_user_command("Normy", function ()
+  vim.wo.relativenumber = not vim.wo.relativenumber
+  vim.cmd("SmearCursorToggle")
+end,{})
+
+
+--- vim-dadbod-completion autocomand
+autocmd("FileType", {
+  pattern = { "sql", "mysql", "plsql" },
+  callback = function()
+    require("cmp").setup.buffer({ sources = {{ name = "vim-dadbod-completion" }} })
+  end,
+})
+
+-- autocmd("FileType", {
+--   pattern = { "sql" },
+--   command = [[setlocal omnifunc=vim_dadbod_completion#omni]],
+-- })
+--
+-- autocmd("FileType", {
+--   pattern = { "sql", "mysql", "plsql" },
+--   callback = function()
+--     vim.schedule(db_completion)
+--     vim.cmd[[ASToggle]]
+--   end,
+-- })
+
+
+-- Add autocommands for Prisma files
+local prisma_group = vim.api.nvim_create_augroup("PrismaModalContextAtTop", { clear = true })
+
+autocmd("BufEnter", {
+  group = prisma_group,
+  pattern = "*.prisma",
+  command = "ContextEnable"
+})
+autocmd("BufLeave", {
+  group = prisma_group,
+  pattern = "*.prisma",
+  command = "ContextDisable"
+})
 
 local augroup = vim.api.nvim_create_augroup("ClaudeCodeFileRefresh", { clear = true })
 local refresh_timer = nil
@@ -56,14 +97,18 @@ autocmd("TermClose", {
 })
 
 -- Create an autocommand that notifies when a file has been changed externally
-autocmd("FileChangedShellPost", {
-  group = augroup,
-  pattern = "*",
-  callback = function()
-    vim.notify("File changed on disk. Buffer reloaded.", vim.log.levels.INFO)
-  end,
-  desc = "Notify when a file is changed externally",
-})
+-- autocmd("FileChangedShellPost", {
+--   group = augroup,
+--   pattern = "*",
+--   callback = function()
+--     vim.notify("File changed on disk. Buffer reloaded.", vim.log.levels.INFO)
+--     -- clear the notification after 1 seconds
+--     vim.defer_fn(function()
+--       vim.notify ""
+--     end, 1000)
+--   end,
+--   desc = "Notify when a file is changed externally",
+-- })
 
 vim.api.nvim_create_autocmd({
   "CursorHold",
@@ -129,11 +174,10 @@ vim.filetype.add {
 }
 require("hlslens").setup()
 
-vim.api.nvim_set_hl(0, "DiffAdd", {bg = "#20303b"})
-vim.api.nvim_set_hl(0, "DiffDelete", {bg = "#37222c"})
-vim.api.nvim_set_hl(0, "DiffChange", {bg = "#1f2231"})
-vim.api.nvim_set_hl(0, "DiffText", {bg = "#394b70"})
-
+vim.api.nvim_set_hl(0, "DiffAdd", { bg = "#20303b" })
+vim.api.nvim_set_hl(0, "DiffDelete", { bg = "#37222c" })
+vim.api.nvim_set_hl(0, "DiffChange", { bg = "#1f2231" })
+vim.api.nvim_set_hl(0, "DiffText", { bg = "#394b70" })
 
 local kopts = { noremap = true, silent = true }
 
@@ -340,3 +384,35 @@ vim.opt.laststatus = 3
 vim.o.foldlevel = 99 -- Using ufo provider need a large value, feel free to decrease the value
 vim.o.foldlevelstart = 99
 vim.o.foldenable = true
+
+-- diffview nvim options
+vim.opt.fillchars:append { diff = "╱" }
+vim.api.nvim_create_autocmd("OptionSet", {
+  pattern = "diff",
+  callback = function()
+    if vim.opt.diff:get() then
+      -- onedark theme colors
+      local c = {
+        dark_gray = "#282C34",
+        red = "#E06C75",
+        green = "#98C379",
+        yellow = "#E5C07B",
+        blue = "#61AFEF",
+        purple = "#C678DD",
+        cyan = "#56B6C2",
+        light_gray = "#ABB2BF",
+        black = "#000000",
+      }
+
+      vim.api.nvim_set_hl(0, "DiffAdd", { bg = "#34462F" })
+      vim.api.nvim_set_hl(0, "DiffChange", { bg = "#2F4146" })
+      vim.api.nvim_set_hl(0, "DiffDelete", { bg = "#462F2F" })
+      vim.api.nvim_set_hl(0, "DiffText", { bg = "#463C2F" })
+
+      -- vim.api.nvim_set_hl(0, "DiffAdd", { bg = c.green, fg = c.black }) -- Added lines
+      -- vim.api.nvim_set_hl(0, "DiffChange", { bg = c.yellow, fg = c.black }) -- Changed lines)
+      -- vim.api.nvim_set_hl(0, "DiffDelete", { bg = c.red, fg = c.black }) -- Deleted lines
+      -- vim.api.nvim_set_hl(0, "DiffText", { bg = c.black, fg = c.yellow }) -- Changed text within a line
+    end
+  end,
+})

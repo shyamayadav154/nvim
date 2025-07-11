@@ -28,7 +28,7 @@ require("avante").setup {
   ---@alias Provider "claude" | "openai" | "azure" | "gemini" | "cohere" | "copilot" | string
   provider = "copilot", -- Recommend using Claude
   mode = "agentic", -- The default mode for interaction. "agentic" uses tools to automatically generate code, "legacy" uses the old planning method to generate code.
-  auto_suggestions_provider = "copilot", -- The provider to use for auto-suggestions. This can be different from the main provider.
+  auto_suggestions_provider = "copilot_suggestions", -- The provider to use for auto-suggestions. This can be different from the main provider.
   ---To add support for custom provider, follow the format below
   ---See https://github.com/yetone/avante.nvim/wiki#custom-providers for more details
   ---@type {[string]: AvanteProvider}
@@ -49,7 +49,7 @@ require("avante").setup {
     copilot = {
       endpoint = "https://api.githubcopilot.com",
       -- model = "gpt-4o-2024-05-13",
-      model = "claude-3.7-sonnet", -- gpt-4o-2024-05-13 | claude-3.7-sonnet | claude-sonnet-4 | gpt-4.1 | gemini-2.5-pro
+      model = "claude-sonnet-4", -- gpt-4o-2024-05-13 | claude-3.7-sonnet | claude-sonnet-4 | gpt-4.1 | gemini-2.5-pro
       proxy = nil, -- [protocol://]host[:port] Use this proxy
       allow_insecure = false, -- Allow insecure server connections
       timeout = 30000, -- Timeout in milliseconds
@@ -57,6 +57,10 @@ require("avante").setup {
         temperature = 0,
         max_tokens = 4096,
       },
+    },
+    copilot_suggestions = {
+      __inherited_from = "copilot",
+      model = "gemini-2.0-flash-001", -- gpt-4o-2024-05-13 | claude-3.7-sonnet | claude-sonnet-4 | gpt-4.1 | gemini-2.5-pro
     },
     openai = {
       endpoint = "https://api.openai.com/v1",
@@ -117,6 +121,17 @@ require("avante").setup {
     },
   },
   hints = { enabled = true },
+  selector = {
+    ---@alias avante.SelectorProvider "native" | "fzf_lua" | "mini_pick" | "snacks" | "telescope" | fun(selector: avante.ui.Selector): nil
+    ---@type avante.SelectorProvider
+    provider = "native",
+    provider_opts = {},
+    exclude_auto_select = {}, -- List of items to exclude from auto selection
+  },
+  suggestion = {
+    debounce = 600,
+    throttle = 600,
+  },
   windows = {
     ---@type "right" | "left" | "top" | "bottom"
     position = "right", -- the position of the sidebar

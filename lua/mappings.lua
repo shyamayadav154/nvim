@@ -2,8 +2,9 @@ require "nvchad.mappings"
 
 local map = vim.keymap.set
 local nomap = vim.keymap.del
+local builtin = require "telescope.builtin"
 
-
+nomap("n", "<leader>v") -- relative line number toggle disabled
 nomap("n", "<leader>n") -- relative line number toggle disabled
 nomap("n", "<leader>b") -- git sign blame disabled
 -- if has keymap at leader gb then remap
@@ -38,7 +39,6 @@ map("t", "%a", function()
     ::continue::
   end
   print("Added buffers to Claude Code: " .. table.concat(buffer_list, ", "))
-
 end, { desc = "Add opened buffer files to claude code" })
 
 -- Add this to your init.lua or a separate config file
@@ -74,12 +74,13 @@ map("t", "%%", function()
   end
 end, { desc = "Add last viewed viewed buffer to claude code" })
 
-
 map("n", "<leader>lq", function()
+  vim.notify_once "opening lint error in quickfix..."
   vim.cmd [[set makeprg=eslint\ -f\ unix\ --quiet\ . ]]
   vim.cmd [[silent! make]]
   vim.cmd [[copen]]
-end, { desc = "Lint and populate quickfix" })
+  vim.notify ""
+end, { desc = "Populate quickfix with lint errors" })
 
 vim.keymap.set({ "n", "x", "o" }, "s", "<Plug>(leap-forward)")
 vim.keymap.set({ "n", "x", "o" }, "S", "<Plug>(leap-backward)")
@@ -232,17 +233,23 @@ map("n", "gj", "<C-w>j", { desc = "Go to window below" })
 map("n", "gk", "<C-w>k", { desc = "Go to window above" })
 map("n", "gH", "<C-w>h", { desc = "Go to window left" })
 map("n", "gL", "<C-w>l", { desc = "Go to window right" })
--- move to the window on the left
-map({ "n", "t" }, "<C-h>", "<C-w>h", { desc = "Go to window left" })
+
+map("t", "gtl", "<C-\\><C-n><C-w>l", { desc = "Go to window right" })
+map("t", "gth", "<C-\\><C-n><C-w>h", { desc = "Go to window left" })
 
 -- Keymap for LSP references
 map("n", "gr", "<cmd>lua vim.lsp.buf.references()<CR>", { desc = "LSP References in quickfix" })
 
 map("n", "<C-f>", ":silent !tmux neww ts<CR>", { desc = "Open new tmux window" })
+
 map("n", "<leader>gr", function()
   require("gitsigns").reset_buffer()
-  print "reset file to last commit"
+  local notification = vim.notify("Git buffer reset", vim.log.levels.INFO, { title = "Gitsigns" })
+  vim.defer_fn(function()
+    vim.notify("", vim.log.levels.INFO, { replace = notification })
+  end, 2000)
 end, { desc = "Git reset current file" })
+
 map("n", "<leader>gs", "<CMD>Gitsigns stage_hunk<CR>", { desc = "Git stage current hunk" })
 
 map("n", "<leader>ih", function()
@@ -256,9 +263,74 @@ map(
   "<CMD>Telescope find_files hidden=true find_command=rg,--files,--hidden,--glob,!.git <CR>",
   { desc = "Find Files hidden too" }
 )
+map("n", "<leader>f.", function()
+  builtin.find_files { cwd = vim.fn.expand "%:p:h" }
+end, { desc = "Find Files in current directory" })
 
 -- Telescope searches
 map("n", "<leader>fw", "<CMD>Telescope live_grep_args<CR>", { desc = "search words with regex" })
+-- Keymap to search word under cursor with Telescope live grep
+vim.keymap.set("n", "<leader>fc", function()
+  require("telescope.builtin").live_grep {
+    default_text = vim.fn.expand "<cword>",
+  }
+end, { desc = "Find word under cursor with live grep" })
+
+vim.keymap.set("n", "<leader>fi", function()
+  local word = vim.fn.expand "<cword>"
+  if word == "" then
+    print "No word under cursor"
+    return
+  end
+
+  require("telescope.builtin").grep_string {
+    search = "function " .. word,
+    attach_mappings = function(prompt_bufnr, map)
+      local actions = require "telescope.actions"
+      local action_state = require "telescope.actions.state"
+
+      -- Override default selection to go to first result automatically
+      local function go_to_first_or_pick()
+        local picker = action_state.get_current_picker(prompt_bufnr)
+        local results = picker.finder.results
+
+        -- if results and #results == 1 then
+        --   -- If results found, go to first one automatically
+        --   picker:set_selection(0)
+        --   actions.select_default(prompt_bufnr)
+        -- else
+        --   -- If no results, close telescope
+        --   actions.close(prompt_bufnr)
+        --   print("No matches found for: " .. word)
+        -- end
+      end
+
+      -- Execute immediately when telescope opens
+      vim.defer_fn(function()
+        if vim.api.nvim_buf_is_valid(prompt_bufnr) then
+          go_to_first_or_pick()
+        end
+      end, 100)
+
+      return true
+    end,
+  }
+end, { desc = "Find word under cursor and jump to first match" })
+
+-- Alternative: Interactive search with word pre-filled
+vim.keymap.set("n", "<leader>fW", function()
+  require("telescope.builtin").live_grep {
+    default_text = vim.fn.expand "<cword>",
+  }
+end, { desc = "Interactive search with word under cursor" })
+
+-- Visual mode: search selected text
+vim.keymap.set("v", "<leader>fw", function()
+  local text = vim.fn.getregion(vim.fn.getpos "v", vim.fn.getpos ".", { type = vim.fn.mode() })
+  require("telescope.builtin").live_grep {
+    default_text = table.concat(text, "\n"),
+  }
+end, { desc = "Find word under cursor with live grep" })
 
 -- telescope old files
 map("n", "<leader>fo", function()
@@ -269,9 +341,10 @@ end, { desc = "Find old files in current directory" })
 
 map("n", "<leader>gf", "<CMD>Telescop git_status<CR>", { desc = "git status" })
 map("n", "<leader>fr", "<CMD>Telescope lsp_references<CR>", { desc = "telescope lsp references" })
-map("n", "<leader>fs", "<CMD>Telescope grep_string<CR>", { desc = " telescope find string under cursor" })
-map("n", "<leader>ws", "<CMD>Telescope lsp_dynamic_workspace_symbols<CR>", { desc = "lsp dynamic workspace symbol" })
-map("n", "<leader>b", "<cmd>Telescope git_branches<CR>", { desc = "Git Branches" })
+-- map("n", "<leader>fs", "<CMD>Telescope grep_string<CR>", { desc = " telescope find string under cursor" })
+-- map("n", "<leader>ws", "<CMD>Telescope lsp_dynamic_workspace_symbols<CR>", { desc = "lsp dynamic workspace symbol" })
+map("n", "<leader>gb", "<cmd>Telescope git_branches<CR>", { desc = "Git Branches" })
+-- map("n", "<leader>gb", "<cmd>lua Snacks.picker.git_branches()<CR>", { desc = "Git Branches" })
 map("n", "<leader>tb", "<CMD>Telescope builtin<CR>", { desc = "Telescope builtins" })
 map("n", "<leader>tr", "<CMD>Telescope resume<CR>", { desc = "Telescope builtins" })
 
@@ -291,8 +364,8 @@ map("n", "[t", ":lua require('todo-comments').jump_prev()<CR>", { desc = "Previo
 
 -- map("n", "gi", "gi", { desc = "move to last insertion and insert" })
 
-map("n", "gT", ":lua require('nvchad.tabufline').move_buf(-1)<CR>", { silent = true, desc = "Move to previous buffer" })
-map("n", "gt", ":lua require('nvchad.tabufline').move_buf(1)<CR>", { silent = true, desc = "Move to next buffer" })
+-- map("n", "gT", ":lua require('nvchad.tabufline').move_buf(-1)<CR>", { silent = true, desc = "Move to previous buffer" })
+-- map("n", "gt", ":lua require('nvchad.tabufline').move_buf(1)<CR>", { silent = true, desc = "Move to next buffer" })
 
 -- lsp related
 -- map("n", "<leader>o", "<CMD>OrganizeImports<CR>", { desc = "Organize imports tss lsp" })
@@ -336,12 +409,17 @@ map("n", "<leader>co", ":%bd|e#<CR>", { desc = "close other buffers" })
 -- map("n", "<C-l>", "<cmd> TmuxNavigateRight<CR>", { desc = "window right" })
 -- map("n", "<C-j>", "<cmd> TmuxNavigateDown<CR>", { desc = "window down" })
 -- map("n", "<C-k>", "<cmd> TmuxNavigateUp<CR>", { desc = "window up" })
-map("n", "<C-d>", "<C-d>zz", { desc = "Jump hanlf page down with cursor in th middle" })
-map("n", "<C-u>", "<C-u>zz", { desc = "Jump hanlf page down with cursor in th middle" })
+-- map("n", "<C-d>", "<C-d>zz", { desc = "Jump hanlf page down with cursor in th middle" })
+-- map("n", "<C-u>", "<C-u>zz", { desc = "Jump hanlf page down with cursor in th middle" })
 map("n", "J", "mzJ`z", { desc = "dont move cursor on j press" })
 map("n", "<leader>u", ":UndotreeToggle<CR>", { desc = "Undo tree toggle" })
 -- map("n", "<leader>gs", "<cmd>Git<cr>", { desc = "Git commit status" })
 map("n", "<A-t>", ":lua require('nvterm.terminal').toggle 'horizontal'<CR>", { desc = "Terminal toggle horizontal" })
+
+-- Snacks floating terminal with claude --continue
+-- map("n", "<leader>tt", function()
+--   require("snacks").terminal(nil,{cmd = "claude --continue"})
+-- end, { desc = "Toggle Claude floating terminal" })
 
 -- Harpoon keymaps
 map(
