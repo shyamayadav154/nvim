@@ -169,7 +169,7 @@ vim.api.nvim_create_autocmd("User", {
 
 vim.filetype.add {
   extension = {
-    mdx = "markdown.mdx",
+    mdx = "mdx",
   },
 }
 require("hlslens").setup()

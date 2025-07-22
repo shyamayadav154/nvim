@@ -23,13 +23,14 @@ local servers = {
   "docker_compose_language_service",
   "jsonls",
   "gopls",
-  "mdx_analyzer",
+  -- "mdx_analyzer",
   "marksman",
   "svelte",
   -- "pylsp"
   -- add python lsp
   "pyright",
   "ruff",
+  -- "harper_ls" --  for spell
   -- "tailwindcss",
 }
 
@@ -41,6 +42,38 @@ for _, lsp in ipairs(servers) do
     capabilities = capabilities,
   }
 end
+
+lspconfig.harper_ls.setup {
+  settings = {
+    ["harper-ls"] = {
+      userDictPath = "",
+      fileDictPath = "",
+      linters = {
+        SpellCheck = true,
+        SpelledNumbers = false,
+        AnA = true,
+        SentenceCapitalization = true,
+        UnclosedQuotes = true,
+        WrongQuotes = false,
+        LongSentences = true,
+        RepeatedWords = true,
+        Spaces = true,
+        Matcher = true,
+        CorrectNumberSuffix = true
+      },
+      codeActions = {
+        ForceStable = false
+      },
+      markdown = {
+        IgnoreLinkTitle = false
+      },
+      diagnosticSeverity = "hint",
+      isolateEnglish = false,
+      dialect = "American",
+      maxFileLength = 120000
+    }
+  }
+}
 
 local util = require "lspconfig/util"
 

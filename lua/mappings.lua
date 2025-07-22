@@ -13,33 +13,65 @@ nomap("n", "<leader>b") -- git sign blame disabled
 nomap("n", "<leader>h")
 nomap("n", "<M-i>")
 
--- in terminal mode double esc press should go to normal mode
--- map("t", "<Esc><Esc>", "<C-\\><C-n>", { desc = "Go to normal mode in terminal" })
+
+-- Example usage:
+-- Create a floating window with default dimensions
+vim.api.nvim_create_user_command("ClaudeFloatTerm", function ()
+  local Snacks = require "snacks"
+  Snacks.terminal('claude --continue',{
+    interactive = true,
+    win  = {
+      border  = "rounded", -- or "single", "double", "solid", etc.
+    }
+  })
+end, {})
+
+-- Create a floating window with default dimensions
+vim.api.nvim_create_user_command("FloatTerm", function ()
+  local Snacks = require "snacks"
+  Snacks.terminal('zsh',{
+    interactive = true,
+    win  = {
+      border  = "rounded", -- or "single", "double", "solid", etc.
+    }
+  })
+end, {})
+
+
+map({'n','t'}, ',ef', "<cmd>FloatTerm<cr>", { desc = "Toggle floating terminal" })
+map({'n','t'}, ',ee', "<cmd>ClaudeFloatTerm<cr>", { desc = "Toggle floating terminal" })
+
 
 map("t", "%a", function()
-  local all_buffers = vim.api.nvim_list_bufs()
-  print(vim.inspect(all_buffers))
-  local buffer_list = {}
-  for _, buf in ipairs(all_buffers) do
-    if vim.api.nvim_buf_is_loaded(buf) then
-      local name = vim.api.nvim_buf_get_name(buf)
-      local relative_name = vim.fn.fnamemodify(name, ":~:.")
-      -- local full_path = vim.fn.fnamemodify(name, ":p")
-      -- ignore if term
-      if name:find "term://" then
-        goto continue
+  coroutine.wrap(function()
+    local all_buffers = vim.api.nvim_list_bufs()
+    print(vim.inspect(all_buffers))
+    local buffer_list = {}
+    local count = 0
+
+    for _, buf in ipairs(all_buffers) do
+      if vim.api.nvim_buf_is_loaded(buf) then
+        local name = vim.api.nvim_buf_get_name(buf)
+        local relative_name = vim.fn.fnamemodify(name, ":~:.")
+        if name:find "term://" then
+          goto continue
+        end
+        if name ~= "" then
+          vim.cmd("ClaudeCodeAdd " .. relative_name)
+          count = count + 1
+          print("Added buffer: " .. relative_name .. " " .. count)
+          table.insert(buffer_list, relative_name)
+        end
       end
-      if name ~= "" then
-        -- echo
-        vim.cmd("ClaudeCodeAdd " .. relative_name)
-        -- vim.cmd("echo 'Buffer: " .. relative_name .. "'")
-        table.insert(buffer_list, relative_name)
-      end
+
+      ::continue::
+
+      -- Wait for 100ms before next iteration
+      vim.wait(10)
     end
-    ::continue::
-  end
-  print("Added buffers to Claude Code: " .. table.concat(buffer_list, ", "))
+  end)()
 end, { desc = "Add opened buffer files to claude code" })
+
 
 -- Add this to your init.lua or a separate config file
 map("t", "%%", function()
@@ -234,8 +266,8 @@ map("n", "gk", "<C-w>k", { desc = "Go to window above" })
 map("n", "gH", "<C-w>h", { desc = "Go to window left" })
 map("n", "gL", "<C-w>l", { desc = "Go to window right" })
 
-map("t", "gtl", "<C-\\><C-n><C-w>l", { desc = "Go to window right" })
-map("t", "gth", "<C-\\><C-n><C-w>h", { desc = "Go to window left" })
+-- map("t", "gtl", "<C-\\><C-n><C-w>l", { desc = "Go to window right" })
+map("t", "<C-h>", "<C-\\><C-n><C-w>h", { desc = "Go to window left" })
 
 -- Keymap for LSP references
 map("n", "gr", "<cmd>lua vim.lsp.buf.references()<CR>", { desc = "LSP References in quickfix" })

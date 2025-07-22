@@ -5,6 +5,23 @@ return {
   { import = "nvcommunity.motion.harpoon" },
   { import = "nvcommunity.editor.treesittercontext" },
   {
+    "pittcat/claude-fzf-history.nvim",
+    dependencies = { "ibhagwan/fzf-lua" },
+    config = function()
+      require("claude-fzf-history").setup()
+    end,
+    cmd = { "ClaudeHistory", "ClaudeHistoryDebug" },
+    keys = {
+      { "<leader>ch", "<cmd>ClaudeHistory<cr>", desc = "Claude History" },
+    },
+  },
+  {
+    "davidmh/mdx.nvim",
+    event = "BufEnter *.mdx",
+    config = true,
+    dependencies = { "nvim-treesitter/nvim-treesitter" },
+  },
+  {
     "iamcco/markdown-preview.nvim",
     cmd = { "MarkdownPreviewToggle", "MarkdownPreview", "MarkdownPreviewStop" },
     ft = { "markdown" },
@@ -102,12 +119,14 @@ return {
     lazy = false,
     ---@type snacks.Config
     opts = {
+      ---@type table<string, snacks.win.Config>
+      styles = {},
       -- your configuration comes here
       -- or leave it empty to use the default settings
       -- refer to the configuration section below
       bigfile = { enabled = true },
       -- animate = { enabled = true },
-      -- terminal = { enabled = true},
+      terminal = { enable = true },
       -- scope = { enabled = true },
       -- dim = { enabled = true },
       -- git = { enabled = true },
@@ -151,9 +170,9 @@ return {
     dependencies = {
       "folke/snacks.nvim", -- optional
     },
-    -- config = true,
+    config = true,
+    lazy = false,
     opts = {
-      -- terminal_cmd = "/Users/shyam/.claude/local/node_modules/.bin/claude",
       -- Diff Integration
       diff_opts = {
         auto_close_on_accept = true, -- Close diff view after accepting changes
@@ -171,13 +190,14 @@ return {
       },
     },
     keys = {
-      { ",t", "<cmd>ClaudeCode --continue --permission-mode plan<cr>", mode = { "n", "t" }, desc = "Toggle Claude" },
-      { ",f", "<cmd>ClaudeCodeFocus<cr>", mode = { "n", "v", "t" }, desc = "Focus Claude" },
-      { ",T", "<cmd>ClaudeCode --continue --dangerously-skip-permissions<cr>", desc = "Continue Claude" },
-      { ",s", "<cmd>ClaudeCodeSend<cr>", mode = "v", desc = "Send to Claude" },
+      { ",t", "<cmd>ClaudeCode --continue <cr>", mode = { "n", "t" }, desc = "Toggle Claude" },
+      { ",T", "<cmd>ClaudeCode --dangerously-skip-permissions<cr>", desc = "Continue Claude" },
+      { ",f", "<cmd>ClaudeCodeFocus<cr>", mode = { "n", "t" }, desc = "Focus Claude" },
+      -- { ",F", "<cmd>ClaudeCode --continue --dangerously-skip-permissions<cr>", desc = "Continue Claude" },
+      { ",f", "<cmd>ClaudeCodeSend<cr>", mode = { "v" }, desc = "Send to Claude" },
       {
         -- "<leader>as",
-        ",s",
+        ",f",
         "<cmd>ClaudeCodeTreeAdd<cr>",
         desc = "Add file",
         ft = { "NvimTree", "neo-tree", "oil" },
@@ -825,7 +845,7 @@ return {
         end,
       }
       conf.defaults.mappings.n = {
-        ["<C-Enter"] = actions.to_fuzzy_refine,
+        ["<C-r>"] = actions.to_fuzzy_refine,
         ["q"] = actions.close,
         ["<C-w>"] = actions.send_selected_to_qflist + actions.open_qflist,
         ["<C-s>"] = actions.cycle_previewers_next,
@@ -833,7 +853,7 @@ return {
       }
 
       conf.defaults.mappings.i = {
-        ["<c-enter"] = actions.to_fuzzy_refine,
+        ["<C-r>"] = actions.to_fuzzy_refine,
         ["<C-j>"] = actions.cycle_history_next,
         ["<C-k>"] = actions.cycle_history_prev,
         ["<C-w>"] = actions.send_selected_to_qflist + actions.open_qflist,
