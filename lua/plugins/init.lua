@@ -104,7 +104,6 @@ return {
       { "nvim-telescope/telescope.nvim", branch = "0.1.x", dependencies = { "nvim-lua/plenary.nvim" } },
     },
     lazy = false,
-    branch = "regexp", -- This is the regexp branch, use this for the new version
     keys = {
       { ",v", "<cmd>VenvSelect<cr>" },
     },
@@ -173,6 +172,23 @@ return {
     config = true,
     lazy = false,
     opts = {
+      -- Server Configuration
+      port_range = { min = 10000, max = 65535 },
+      auto_start = true,
+      log_level = "info", -- "trace", "debug", "info", "warn", "error"
+      terminal_cmd = nil, -- Custom terminal command (default: "claude")
+      -- For local installations: "~/.claude/local/claude"
+      -- For native binary: use output from 'which claude'
+
+      -- Send/Focus Behavior
+      -- When true, successful sends will focus the Claude terminal if already connected
+      focus_after_send = true,
+
+      -- Selection Tracking
+      track_selection = true,
+      visual_demotion_delay_ms = 50,
+
+
       -- Diff Integration
       diff_opts = {
         auto_close_on_accept = true, -- Close diff view after accepting changes
@@ -388,56 +404,56 @@ return {
       }
     end,
   },
-  {
-    "yetone/avante.nvim",
-    event = "VeryLazy",
-    version = false, -- set this if you want to always pull the latest change
-    opts = {},
-    config = function()
-      require "configs.avante"
-    end,
-    -- if you want to build from source then do `make BUILD_FROM_SOURCE=true`
-    build = "make",
-    -- build = "powershell -ExecutionPolicy Bypass -File Build.ps1 -BuildFromSource false" -- for windows
-    dependencies = {
-      "nvim-treesitter/nvim-treesitter",
-      "stevearc/dressing.nvim",
-      "nvim-lua/plenary.nvim",
-      "MunifTanjim/nui.nvim",
-      --- The below dependencies are optional,
-      "echasnovski/mini.pick", -- for file_selector provider mini.pick
-      "nvim-telescope/telescope.nvim", -- for file_selector provider telescope
-      "hrsh7th/nvim-cmp", -- autocompletion for avante commands and mentions
-      "ibhagwan/fzf-lua", -- for file_selector provider fzf
-      "nvim-tree/nvim-web-devicons", -- or echasnovski/mini.icons
-      "zbirenbaum/copilot.lua", -- for providers='copilot'
-      {
-        -- support for image pasting
-        "HakonHarnes/img-clip.nvim",
-        event = "VeryLazy",
-        opts = {
-          -- recommended settings
-          default = {
-            embed_image_as_base64 = false,
-            prompt_for_file_name = false,
-            drag_and_drop = {
-              insert_mode = true,
-            },
-            -- required for Windows users
-            use_absolute_path = true,
-          },
-        },
-      },
-      {
-        -- Make sure to set this up properly if you have lazy=true
-        "MeanderingProgrammer/render-markdown.nvim",
-        opts = {
-          file_types = { "markdown", "Avante" },
-        },
-        ft = { "markdown", "Avante" },
-      },
-    },
-  },
+  -- {
+  --   "yetone/avante.nvim",
+  --   event = "VeryLazy",
+  --   version = false, -- set this if you want to always pull the latest change
+  --   opts = {},
+  --   config = function()
+  --     require "configs.avante"
+  --   end,
+  --   -- if you want to build from source then do `make BUILD_FROM_SOURCE=true`
+  --   build = "make",
+  --   -- build = "powershell -ExecutionPolicy Bypass -File Build.ps1 -BuildFromSource false" -- for windows
+  --   dependencies = {
+  --     "nvim-treesitter/nvim-treesitter",
+  --     "stevearc/dressing.nvim",
+  --     "nvim-lua/plenary.nvim",
+  --     "MunifTanjim/nui.nvim",
+  --     --- The below dependencies are optional,
+  --     "echasnovski/mini.pick", -- for file_selector provider mini.pick
+  --     "nvim-telescope/telescope.nvim", -- for file_selector provider telescope
+  --     "hrsh7th/nvim-cmp", -- autocompletion for avante commands and mentions
+  --     "ibhagwan/fzf-lua", -- for file_selector provider fzf
+  --     "nvim-tree/nvim-web-devicons", -- or echasnovski/mini.icons
+  --     "zbirenbaum/copilot.lua", -- for providers='copilot'
+  --     {
+  --       -- support for image pasting
+  --       "HakonHarnes/img-clip.nvim",
+  --       event = "VeryLazy",
+  --       opts = {
+  --         -- recommended settings
+  --         default = {
+  --           embed_image_as_base64 = false,
+  --           prompt_for_file_name = false,
+  --           drag_and_drop = {
+  --             insert_mode = true,
+  --           },
+  --           -- required for Windows users
+  --           use_absolute_path = true,
+  --         },
+  --       },
+  --     },
+  --     {
+  --       -- Make sure to set this up properly if you have lazy=true
+  --       "MeanderingProgrammer/render-markdown.nvim",
+  --       opts = {
+  --         file_types = { "markdown", "Avante" },
+  --       },
+  --       ft = { "markdown", "Avante" },
+  --     },
+  --   },
+  -- },
   {
     "aaronhallaert/advanced-git-search.nvim",
     cmd = { "AdvancedGitSearch" },
@@ -515,27 +531,27 @@ return {
   --     require("tsw").setup(opts)
   --   end,
   -- },
-  -- {
-  --   -- enabled = false,
-  --   "supermaven-inc/supermaven-nvim",
-  --   event = "InsertEnter",
-  --   config = function()
-  --     require("supermaven-nvim").setup {
-  --       keymaps = {
-  --         accept_suggestion = "<M-l>",
-  --         clear_suggestion = "<C-]>",
-  --         accept_word = "<M-j>",
-  --       },
-  --       ignore_filetypes = { cpp = true },
-  --       color = {
-  --         suggestion_color = "#ffffff",
-  --         cterm = 244,
-  --       },
-  --       disable_inline_completion = false, -- disables inline completion for use with cmp
-  --       disable_keymaps = false, -- disables built in keymaps for more manual control
-  --     }
-  --   end,
-  -- },
+  {
+    -- enabled = false,
+    "supermaven-inc/supermaven-nvim",
+    event = "InsertEnter",
+    config = function()
+      require("supermaven-nvim").setup {
+        keymaps = {
+          accept_suggestion = "<M-l>",
+          clear_suggestion = "<C-]>",
+          accept_word = "<M-j>",
+        },
+        ignore_filetypes = { cpp = true },
+        color = {
+          suggestion_color = "#ffffff",
+          cterm = 244,
+        },
+        disable_inline_completion = false, -- disables inline completion for use with cmp
+        disable_keymaps = false, -- disables built in keymaps for more manual control
+      }
+    end,
+  },
   {
     "kevinhwang91/nvim-hlslens",
     event = "VeryLazy",
@@ -1007,37 +1023,37 @@ return {
   --   },
   --   -- See Commands section for default commands if you want to lazy load on them
   -- },
-  {
-    "zbirenbaum/copilot.lua",
-    cmd = "Copilot",
-    event = "InsertEnter",
-    opts = {
-      filetypes = {
-        yaml = true,
-        markdown = true,
-        help = false,
-        gitcommit = false,
-        gitrebase = false,
-        hgcommit = false,
-        svn = false,
-        cvs = false,
-        ["."] = false,
-      },
-      suggestion = {
-        auto_trigger = true,
-        debounce = 100,
-        hide_during_completion = true,
-        keymap = {
-          accept = "<M-l>",
-          accept_word = "<M-j>",
-          accept_line = "<M-k>",
-          next = "<M-]>",
-          prev = "<M-[>",
-          dismiss = "<C-]>",
-        },
-      },
-    },
-  },
+  -- {
+  --   "zbirenbaum/copilot.lua",
+  --   cmd = "Copilot",
+  --   event = "InsertEnter",
+  --   opts = {
+  --     filetypes = {
+  --       yaml = true,
+  --       markdown = true,
+  --       help = false,
+  --       gitcommit = false,
+  --       gitrebase = false,
+  --       hgcommit = false,
+  --       svn = false,
+  --       cvs = false,
+  --       ["."] = false,
+  --     },
+  --     suggestion = {
+  --       auto_trigger = true,
+  --       debounce = 100,
+  --       hide_during_completion = true,
+  --       keymap = {
+  --         accept = "<M-l>",
+  --         accept_word = "<M-j>",
+  --         accept_line = "<M-k>",
+  --         next = "<M-]>",
+  --         prev = "<M-[>",
+  --         dismiss = "<C-]>",
+  --       },
+  --     },
+  --   },
+  -- },
   {
     -- indent guess prisma mainly
     "NMAC427/guess-indent.nvim",

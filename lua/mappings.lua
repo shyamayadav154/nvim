@@ -13,34 +13,31 @@ nomap("n", "<leader>b") -- git sign blame disabled
 nomap("n", "<leader>h")
 nomap("n", "<M-i>")
 
-
 -- Example usage:
 -- Create a floating window with default dimensions
-vim.api.nvim_create_user_command("ClaudeFloatTerm", function ()
+vim.api.nvim_create_user_command("ClaudeFloatTerm", function()
   local Snacks = require "snacks"
-  Snacks.terminal('claude --continue',{
+  Snacks.terminal("claude --continue", {
     interactive = true,
-    win  = {
-      border  = "rounded", -- or "single", "double", "solid", etc.
-    }
+    win = {
+      border = "rounded", -- or "single", "double", "solid", etc.
+    },
   })
 end, {})
 
 -- Create a floating window with default dimensions
-vim.api.nvim_create_user_command("FloatTerm", function ()
+vim.api.nvim_create_user_command("FloatTerm", function()
   local Snacks = require "snacks"
-  Snacks.terminal('zsh',{
+  Snacks.terminal("zsh", {
     interactive = true,
-    win  = {
-      border  = "rounded", -- or "single", "double", "solid", etc.
-    }
+    win = {
+      border = "rounded", -- or "single", "double", "solid", etc.
+    },
   })
 end, {})
 
-
-map({'n','t'}, ',ef', "<cmd>FloatTerm<cr>", { desc = "Toggle floating terminal" })
-map({'n','t'}, ',ee', "<cmd>ClaudeFloatTerm<cr>", { desc = "Toggle floating terminal" })
-
+map({ "n", "t" }, ",ef", "<cmd>FloatTerm<cr>", { desc = "Toggle floating terminal" })
+map({ "n", "t" }, ",ee", "<cmd>ClaudeFloatTerm<cr>", { desc = "Toggle floating terminal" })
 
 map("t", "%a", function()
   coroutine.wrap(function()
@@ -71,7 +68,6 @@ map("t", "%a", function()
     end
   end)()
 end, { desc = "Add opened buffer files to claude code" })
-
 
 -- Add this to your init.lua or a separate config file
 map("t", "%%", function()
@@ -108,11 +104,30 @@ end, { desc = "Add last viewed viewed buffer to claude code" })
 
 map("n", "<leader>lq", function()
   vim.notify_once "opening lint error in quickfix..."
-  vim.cmd [[set makeprg=eslint\ -f\ unix\ --quiet\ . ]]
-  vim.cmd [[silent! make]]
-  vim.cmd [[copen]]
-  vim.notify ""
+  
+  vim.fn.jobstart("eslint -f unix --quiet --ext .js,.jsx . ", {
+    stdout_buffered = true,
+    stderr_buffered = true,
+    on_exit = function(_, exit_code)
+      vim.schedule(function()
+        if exit_code == 0 then
+          vim.notify("No lint errors found")
+        else
+          vim.cmd("copen")
+        end
+      end)
+    end,
+    on_stdout = function(_, data)
+      if data and #data > 0 then
+        vim.fn.setqflist({}, 'r', {
+          title = 'ESLint',
+          lines = data
+        })
+      end
+    end,
+  })
 end, { desc = "Populate quickfix with lint errors" })
+
 
 vim.keymap.set({ "n", "x", "o" }, "s", "<Plug>(leap-forward)")
 vim.keymap.set({ "n", "x", "o" }, "S", "<Plug>(leap-backward)")
@@ -300,7 +315,12 @@ map("n", "<leader>f.", function()
 end, { desc = "Find Files in current directory" })
 
 -- Telescope searches
-map("n", "<leader>fw", "<CMD>Telescope live_grep_args<CR>", { desc = "search words with regex" })
+map("n", "<leader>fg", function()
+  require("telescope.builtin").live_grep {
+    default_text = vim.fn.expand "<cword>",
+  }
+end, { noremap = true, silent = true, desc = "Live grep word under cursor" })
+
 -- Keymap to search word under cursor with Telescope live grep
 vim.keymap.set("n", "<leader>fc", function()
   require("telescope.builtin").live_grep {
@@ -468,25 +488,25 @@ map(
 )
 map(
   "n",
-  "<leader>1",
+  "<leader>hj",
   "<CMD> lua require('harpoon.ui').nav_file(1)<CR>",
   { desc = "Navigate to file 1 in harpoon", silent = true }
 )
 map(
   "n",
-  "<leader>2",
+  "<leader>hk",
   "<CMD> lua require('harpoon.ui').nav_file(2)<CR>",
   { desc = "Navigate to file 2 in harpoon", silent = true }
 )
 map(
   "n",
-  "<leader>3",
+  "<leader>hl",
   "<CMD> lua require('harpoon.ui').nav_file(3)<CR>",
   { desc = "Navigate to file 3 in harpoon", silent = true }
 )
 map(
   "n",
-  "<leader>4",
+  "<leader>h;",
   "<CMD> lua require('harpoon.ui').nav_file(4)<CR>",
   { desc = "Navigate to file 4 in harpoon", silent = true }
 )

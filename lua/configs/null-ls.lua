@@ -46,9 +46,11 @@ local sources = {
     },
   },
   -- b.formatting.prettierd,
+  b.formatting.shfmt,
+  -- Lua
+  b.formatting.stylua,
 
   b.diagnostics.zsh,
-  b.formatting.shfmt,
   -- b.diagnostics.markdownlint,
   -- b.formatting.markdownlint,
 
@@ -66,8 +68,6 @@ local sources = {
   -- b.completion.spell,
   -- b.completion.tags,
 
-  -- Lua
-  b.formatting.stylua,
 
   -- b.diagnostics.ruff,
   -- b.formatting.ruff_format,
