@@ -4,6 +4,26 @@ local map = vim.keymap.set
 local nomap = vim.keymap.del
 local builtin = require "telescope.builtin"
 
+local function start_spinner(msg, title)
+  local frames = { "⠋", "⠙", "⠹", "⠸", "⠼", "⠴", "⠦", "⠧", "⠇", "⠏" }
+  local idx = 1
+  local timer = vim.uv.new_timer()
+  if timer then
+    timer:start(0, 100, vim.schedule_wrap(function()
+      vim.notify(msg .. " " .. frames[idx], vim.log.levels.INFO, { title = title, replace = true })
+      idx = (idx % #frames) + 1
+    end))
+  end
+  return timer
+end
+
+local function stop_spinner(timer)
+  if timer then
+    timer:stop()
+    timer:close()
+  end
+end
+
 nomap("n", "<leader>v") -- relative line number toggle disabled
 nomap("n", "<leader>n") -- relative line number toggle disabled
 nomap("n", "<leader>b") -- git sign blame disabled
@@ -103,15 +123,16 @@ map("t", "%%", function()
 end, { desc = "Add last viewed viewed buffer to claude code" })
 
 map("n", "<leader>lq", function()
-  vim.notify_once "opening lint error in quickfix..."
-  
-  vim.fn.jobstart("eslint -f unix --quiet --ext .js,.jsx . ", {
+  local timer = start_spinner("ESLint running", "Lint")
+
+  vim.fn.jobstart("npx eslint -f unix --quiet --ext .js,.jsx --ignore-pattern '.claude' . ", {
     stdout_buffered = true,
     stderr_buffered = true,
     on_exit = function(_, exit_code)
       vim.schedule(function()
+        stop_spinner(timer)
         if exit_code == 0 then
-          vim.notify("No lint errors found")
+          vim.notify("No lint errors found", vim.log.levels.INFO, { title = "Lint" })
         else
           vim.cmd("copen")
         end
@@ -119,10 +140,18 @@ map("n", "<leader>lq", function()
     end,
     on_stdout = function(_, data)
       if data and #data > 0 then
-        vim.fn.setqflist({}, 'r', {
-          title = 'ESLint',
-          lines = data
-        })
+        vim.schedule(function()
+          local items = {}
+          for _, line in ipairs(data) do
+            local file, lnum, col, msg = line:match("^(.+):(%d+):(%d+): (.+)$")
+            if file then
+              table.insert(items, { filename = file, lnum = tonumber(lnum), col = tonumber(col), text = msg })
+            end
+          end
+          if #items > 0 then
+            vim.fn.setqflist({}, 'r', { title = 'ESLint', items = items })
+          end
+        end)
       end
     end,
   })

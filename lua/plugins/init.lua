@@ -641,13 +641,6 @@ return {
     opts = {},
   },
   {
-    -- leap nvim
-    "ggandor/leap.nvim",
-    dependencies = "tpope/vim-repeat",
-    opts = {},
-    event = "VeryLazy",
-  },
-  {
     -- vim signature
     "kshenoy/vim-signature",
     event = "VeryLazy",
