@@ -122,40 +122,66 @@ map("t", "%%", function()
   end
 end, { desc = "Add last viewed viewed buffer to claude code" })
 
-map("n", "<leader>lq", function()
-  local timer = start_spinner("ESLint running", "Lint")
+local function run_eslint(quiet)
+  local title = quiet and "Running ESLint (errors only) for qflist" or "Running ESLint (all warnings) for qflist"
+  local cmd = quiet and "npx eslint -f json --quiet --ext .js,.jsx . " or "npx eslint -f json --ext .js,.jsx . "
+  local handle = require("fidget.progress.handle").create({
+    title = title,
+    message = "In progress ...",
+    lsp_client = { name = "eslint" },
+    cancellable = false,
+  })
+  local stdout_chunks = {}
 
-  vim.fn.jobstart("npx eslint -f unix --quiet --ext .js,.jsx --ignore-pattern '.claude' . ", {
+  vim.fn.jobstart(cmd, {
     stdout_buffered = true,
     stderr_buffered = true,
     on_exit = function(_, exit_code)
       vim.schedule(function()
-        stop_spinner(timer)
         if exit_code == 0 then
+          handle:finish()
           vim.notify("No lint errors found", vim.log.levels.INFO, { title = "Lint" })
         else
+          handle:finish()
           vim.cmd("copen")
         end
       end)
     end,
     on_stdout = function(_, data)
       if data and #data > 0 then
+        for _, chunk in ipairs(data) do
+          table.insert(stdout_chunks, chunk)
+        end
         vim.schedule(function()
+          local raw = table.concat(stdout_chunks, "")
+          local ok, parsed = pcall(vim.fn.json_decode, raw)
+          if not ok or type(parsed) ~= "table" then return end
           local items = {}
-          for _, line in ipairs(data) do
-            local file, lnum, col, msg = line:match("^(.+):(%d+):(%d+): (.+)$")
-            if file then
-              table.insert(items, { filename = file, lnum = tonumber(lnum), col = tonumber(col), text = msg })
+          for _, file_result in ipairs(parsed) do
+            for _, msg in ipairs(file_result.messages or {}) do
+              table.insert(items, {
+                filename = file_result.filePath,
+                lnum = msg.line or 1,
+                col = msg.column or 1,
+                text = (type(msg.ruleId) == "string" and ("[" .. msg.ruleId .. "] ") or "") .. (msg.message or ""),
+                type = msg.severity == 2 and "E" or "W",
+              })
             end
           end
           if #items > 0 then
+            handle.message = "parsing results..."
             vim.fn.setqflist({}, 'r', { title = 'ESLint', items = items })
           end
         end)
       end
     end,
   })
-end, { desc = "Populate quickfix with lint errors" })
+end
+
+vim.api.nvim_create_user_command("EslintErrors", function() run_eslint(true) end, { desc = "ESLint errors only (quiet)" })
+vim.api.nvim_create_user_command("EslintAll", function() run_eslint(false) end, { desc = "ESLint all warnings and errors" })
+
+map("n", "<leader>lq", function() run_eslint(true) end, { desc = "Populate quickfix with lint errors" })
 
 
 vim.keymap.set({ "n", "x", "o" }, "s", "<Plug>(leap-forward)")
