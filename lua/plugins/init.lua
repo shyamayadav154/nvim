@@ -5,17 +5,6 @@ return {
   { import = "nvcommunity.motion.harpoon" },
   { import = "nvcommunity.editor.treesittercontext" },
   {
-    "pittcat/claude-fzf-history.nvim",
-    dependencies = { "ibhagwan/fzf-lua" },
-    config = function()
-      require("claude-fzf-history").setup()
-    end,
-    cmd = { "ClaudeHistory", "ClaudeHistoryDebug" },
-    keys = {
-      { "<leader>ch", "<cmd>ClaudeHistory<cr>", desc = "Claude History" },
-    },
-  },
-  {
     "davidmh/mdx.nvim",
     event = "BufEnter *.mdx",
     config = true,
@@ -27,48 +16,13 @@ return {
     ft = { "markdown" },
     build = "cd app && npm install",
   },
-
-  -- { import = "nvcommunity.motion.neoscroll" },
-  -- {
-  --   "karb94/neoscroll.nvim",
-  --   keys = {
-  --     -- Keys to be mapped to their corresponding default scrolling animation
-  --     "<C-u>",
-  --     "<C-d>",
-  --     "<C-b>",
-  --     "<C-f>",
-  --     "<C-y>",
-  --     "<C-e>",
-  --     "zt",
-  --     "zz",
-  --     "zb",
-  --   },
-  --   opts = {
-  --     enable = false, -- Enable scrolling animations
-  --     mappings = { -- Keys to be mapped to their corresponding default scrolling animation
-  --       "<C-u>",
-  --       "<C-d>",
-  --       "<C-b>",
-  --       "<C-f>",
-  --       "<C-y>",
-  --       "<C-e>",
-  --       "zt",
-  --       "zz",
-  --       "zb",
-  --     },
-  --     ignored_events = { -- Events ignored while scrolling
-  --       "WinScrolled",
-  --       "CursorMoved",
-  --     },
-  --   },
-  -- },
   {
     event = "VeryLazy",
     "sphamba/smear-cursor.nvim",
     opts = {
 
       time_interval = 7, -- milliseconds
-      enabled = false,
+      enabled = true,
       stiffness = 0.8, -- 0.6      [0, 1]
       trailing_stiffness = 0.5, -- 0.4      [0, 1]
       stiffness_insert_mode = 0.7, -- 0.5      [0, 1]
@@ -188,7 +142,6 @@ return {
       track_selection = true,
       visual_demotion_delay_ms = 50,
 
-
       -- Diff Integration
       diff_opts = {
         auto_close_on_accept = true, -- Close diff view after accepting changes
@@ -225,89 +178,6 @@ return {
       -- Diff management
       -- { "<leader>aa", "<cmd>ClaudeCodeDiffAccept<cr>", desc = "Accept diff" },
       -- { "<leader>ad", "<cmd>ClaudeCodeDiffDeny<cr>", desc = "Deny diff" },
-    },
-  },
-  -- {
-  --   "greggh/claude-code.nvim",
-  --   dependencies = {
-  --     "nvim-lua/plenary.nvim", -- Required for git operations
-  --   },
-  --   event = "VeryLazy",
-  --   -- cmd = {"ClaudeCode", "ClaudeCodeContinue", "ClaudeCodeResume", "ClaudeCodeVerbose"},
-  --   opts = {},
-  --   config = function()
-  --     require "configs.claude-code"
-  --   end,
-  -- },
-  -- {
-  --   "rmagatti/auto-session",
-  --   lazy = false,
-  --
-  --   ---enables autocomplete for opts
-  --   ---@module "auto-session"
-  --   ---@type AutoSession.Config
-  --   opts = {
-  --     suppressed_dirs = { "~/", "~/Projects", "~/Downloads", "/" },
-  --     -- log_level = 'debug',
-  --   },
-  -- },
-  {
-    "ravitemer/mcphub.nvim",
-    dependencies = {
-      "nvim-lua/plenary.nvim", -- Required for Job and HTTP requests
-    },
-    -- comment the following line to ensure hub will be ready at the earliest
-    cmd = "MCPHub", -- lazy load by default
-    build = "npm install -g mcp-hub@latest", -- Installs required mcp-hub npm module
-    -- uncomment this if you don't want mcp-hub to be available globally or can't use -g
-    -- build = "bundled_build.lua",  -- Use this and set use_bundled_binary = true in opts  (see Advanced configuration)
-    -- config = function()
-    --   require("mcphub").setup()
-    -- end,
-    opts = {
-      auto_approve = true, -- Auto approve mcp tool calls
-      extensions = {
-        avante = {
-          make_slash_commands = true, -- make /slash commands from MCP server prompts
-        },
-      },
-    },
-  },
-  {
-    "folke/trouble.nvim",
-    opts = {}, -- for default options, refer to the configuration section for custom setup.
-    cmd = "Trouble",
-    keys = {
-      {
-        "<leader>dd",
-        "<cmd>Trouble diagnostics toggle filter.severity=vim.diagnostic.severity.ERROR <cr>",
-        desc = "Diagnostics (Trouble)",
-      },
-      {
-        "<leader>db",
-        "<cmd>Trouble diagnostics toggle filter.buf=0 filter.severity=vim.diagnostic.severity.ERROR<cr>",
-        desc = "Buffer Diagnostics (Trouble)",
-      },
-      {
-        "<leader>cs",
-        "<cmd>Trouble symbols toggle focus=false<cr>",
-        desc = "Symbols (Trouble)",
-      },
-      {
-        "<leader>cl",
-        "<cmd>Trouble lsp toggle focus=false win.position=right<cr>",
-        desc = "LSP Definitions / references / ... (Trouble)",
-      },
-      {
-        "<leader>xL",
-        "<cmd>Trouble loclist toggle<cr>",
-        desc = "Location List (Trouble)",
-      },
-      {
-        "<leader>xQ",
-        "<cmd>Trouble qflist toggle<cr>",
-        desc = "Quickfix List (Trouble)",
-      },
     },
   },
   {
@@ -357,23 +227,6 @@ return {
     cmd = { "ContextEnable" },
     "wellle/context.vim",
   },
-  -- {
-  --   event = "VeryLazy",
-  --   "karb94/neoscroll.nvim",
-  --   opts = {
-  --     mappings = {
-  --       "<C-u>",
-  --       "<C-d>",
-  --       "<C-b>",
-  --       "<C-f>",
-  --       "<C-y>",
-  --       "<C-e>",
-  --       "zt",
-  --       "zz",
-  --       "zb",
-  --     },
-  --   },
-  -- },
   {
     event = "VeryLazy",
     "folke/todo-comments.nvim",
@@ -636,26 +489,42 @@ return {
     end,
   },
   {
-    "axieax/urlview.nvim",
-    event = "BufRead",
-    opts = {},
-  },
-  {
     -- vim signature
     "kshenoy/vim-signature",
     event = "VeryLazy",
   },
   {
-    -- vim visual multi
-    "mg979/vim-visual-multi",
-    event = "VeryLazy",
+      "barrett-ruth/import-cost.nvim",
+      event = "BufRead",
+      init = function()
+          vim.g.import_cost = {
+              package_manager = "yarn",
+              filetypes = {},
+          }
+      end,
+      config = function()
+          vim.api.nvim_create_user_command("ImportCostToggle", function()
+              local ic = require("import-cost")
+              local extmark = require("import-cost.extmark")
+              local bufnr = vim.api.nvim_get_current_buf()
+              local ft = vim.bo.filetype
+
+              if vim.b.import_cost_on then
+                  extmark.clear_extmarks(bufnr)
+                  ic.config.filetypes = vim.tbl_filter(function(f)
+                      return f ~= ft
+                  end, ic.config.filetypes)
+                  vim.b.import_cost_on = false
+              else
+                  if not vim.tbl_contains(ic.config.filetypes, ft) then
+                      table.insert(ic.config.filetypes, ft)
+                  end
+                  ic.attach(bufnr)
+                  vim.b.import_cost_on = true
+              end
+          end, {})
+      end,
   },
-  -- {
-  --     "barrett-ruth/import-cost.nvim",
-  --     event = "BufRead",
-  --     build = "sh install.sh yarn",
-  --     config = true,
-  -- },
   {
     "tpope/vim-fugitive",
     event = "VeryLazy",
@@ -727,31 +596,10 @@ return {
     dependencies = { "nvim-lua/plenary.nvim" },
     opts = { signs = false },
   },
-  -- {
-  --   "pmizio/typescript-tools.nvim",
-  --   event = "BufReadPre",
-  --   dependencies = {
-  --     "nvim-lua/plenary.nvim",
-  --     "neovim/nvim-lspconfig",
-  --   },
-  --   opts = {},
-  --   config = function()
-  --     require "configs.typescript-tools"
-  --   end,
-  -- },
   {
     "axelvc/template-string.nvim",
     event = "VeryLazy",
     opts = {},
-  },
-  {
-    "ThePrimeagen/refactoring.nvim",
-    cmd = "Refactor",
-    opts = {},
-    dependencies = {
-      "nvim-lua/plenary.nvim",
-      "nvim-treesitter/nvim-treesitter",
-    },
   },
   {
     "mattn/emmet-vim",
@@ -767,49 +615,6 @@ return {
       require "configs.null-ls"
     end,
   },
-  -- {
-  --   "mfussenegger/nvim-lint",
-  --   event = { "BufReadPre", "BufNewFile" },
-  --   config = function()
-  --     local lint = require "lint"
-  --     lint.linters_by_ft = {
-  --       javascript = { "cspell", "codespell" },
-  --     }
-  --     -- Create autocommand which carries out the actual linting
-  --     -- on the specified events.
-  --     local lint_augroup = vim.api.nvim_create_augroup("lint", { clear = true })
-  --     vim.api.nvim_create_autocmd({ "BufEnter", "BufWritePost", "InsertLeave" }, {
-  --       group = lint_augroup,
-  --       callback = function()
-  --         require("lint").try_lint()
-  --       end,
-  --     })
-  --     vim.keymap.set("n", "<leader>lt", function()
-  --       lint.try_lint()
-  --     end, { desc = "Trigger linting for current file" })
-  --   end,
-  -- },
-  -- {
-  --     "tpope/vim-fugitive",
-  --     cmd = {
-  --         "Git",
-  --         "Gdiffsplit",
-  --         "Gvdiffsplit",
-  --         "Gsplit",
-  --         "Gvsplit",
-  --         "Gread",
-  --         "Gwrite",
-  --         "Ggrep",
-  --         "GMove",
-  --         "GDelete",
-  --         "GBrowse",
-  --         "GRemove",
-  --         "GRename",
-  --         "Glgrep",
-  --         "Gedit",
-  --     },
-  --     ft = { "fugitive" },
-  -- },
   {
     "nvim-telescope/telescope.nvim",
     dependencies = {
@@ -883,11 +688,6 @@ return {
     --   },
     -- },
   },
-  -- { import = "nvcommunity.motion.neoscroll" },
-  -- {
-  --   "christoomey/vim-tmux-navigator",
-  --   lazy = false,
-  -- },
   {
     "f-person/git-blame.nvim",
     cmd = {
@@ -942,10 +742,6 @@ return {
       }
     end,
   },
-  -- {
-  --     "David-Kunz/gen.nvim",
-  --     cmd = { "Gen", "GenOnly" },
-  -- },
   {
     "stevearc/dressing.nvim",
     event = "VeryLazy",
@@ -1003,69 +799,6 @@ return {
       { "[[", desc = "Prev Reference" },
     },
   },
-  -- {
-  --   "CopilotC-Nvim/CopilotChat.nvim",
-  --   cmd = { "CopilotChatOpen" },
-  --   dependencies = {
-  --     { "zbirenbaum/copilot.lua" }, -- or zbirenbaum/copilot.lua
-  --     { "nvim-lua/plenary.nvim", branch = "master" }, -- for curl, log and async functions
-  --   },
-  --   build = "make tiktoken", -- Only on MacOS or Linux
-  --   opts = {
-  --     -- See Configuration section for options
-  --   },
-  --   -- See Commands section for default commands if you want to lazy load on them
-  -- },
-  -- {
-  --   "zbirenbaum/copilot.lua",
-  --   cmd = "Copilot",
-  --   event = "InsertEnter",
-  --   opts = {
-  --     filetypes = {
-  --       yaml = true,
-  --       markdown = true,
-  --       help = false,
-  --       gitcommit = false,
-  --       gitrebase = false,
-  --       hgcommit = false,
-  --       svn = false,
-  --       cvs = false,
-  --       ["."] = false,
-  --     },
-  --     suggestion = {
-  --       auto_trigger = true,
-  --       debounce = 100,
-  --       hide_during_completion = true,
-  --       keymap = {
-  --         accept = "<M-l>",
-  --         accept_word = "<M-j>",
-  --         accept_line = "<M-k>",
-  --         next = "<M-]>",
-  --         prev = "<M-[>",
-  --         dismiss = "<C-]>",
-  --       },
-  --     },
-  --   },
-  -- },
-  {
-    -- indent guess prisma mainly
-    "NMAC427/guess-indent.nvim",
-    event = "BufReadPre",
-    opts = {},
-  },
-  -- {
-  -- -- doesn't work well shows's more indent spaces sometimes
-  --     "tpope/vim-sleuth",
-  --     event = "BufRead",
-  -- },
-  -- {
-  --   "stevearc/conform.nvim",
-  --   -- event = 'BufWritePre', -- uncomment for format on save
-  --   config = function()
-  --     require "configs.conform"
-  --   end,
-  -- },
-  -- These are some examples, uncomment them if you want to see them work!
   {
     "neovim/nvim-lspconfig",
     dependencies = {
