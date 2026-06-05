@@ -835,6 +835,8 @@ return {
         "graphql",
         "json",
       },
+      highlight = { enable = true },
+      indent = { enable = true },
       textobjects = {
         select = {
           enable = true,
@@ -922,6 +924,9 @@ return {
         },
       },
     },
+    config = function(_, opts)
+      require("nvim-treesitter.configs").setup(opts)
+    end,
   },
   {
     "nvim-telescope/telescope-media-files.nvim",
