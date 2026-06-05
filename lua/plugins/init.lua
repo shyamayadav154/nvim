@@ -17,39 +17,6 @@ return {
     build = "cd app && npm install",
   },
   {
-    event = "VeryLazy",
-    "sphamba/smear-cursor.nvim",
-    opts = {
-
-      time_interval = 7, -- milliseconds
-      enabled = true,
-      stiffness = 0.8, -- 0.6      [0, 1]
-      trailing_stiffness = 0.5, -- 0.4      [0, 1]
-      stiffness_insert_mode = 0.7, -- 0.5      [0, 1]
-      trailing_stiffness_insert_mode = 0.7, -- 0.5      [0, 1]
-      damping = 0.8, -- 0.65     [0, 1]
-      damping_insert_mode = 0.8, -- 0.7      [0, 1]
-      distance_stop_animating = 0.5,
-      -- Smear cursor when switching buffers or windows.
-      smear_between_buffers = true,
-
-      -- Smear cursor when moving within line or to neighbor lines.
-      -- Use `min_horizontal_distance_smear` and `min_vertical_distance_smear` for finer control
-      smear_between_neighbor_lines = true,
-
-      -- Draw the smear in buffer space instead of screen space when scrolling
-      scroll_buffer_space = true,
-
-      -- Set to `true` if your font supports legacy computing symbols (block unicode symbols).
-      -- Smears will blend better on all backgrounds.
-      legacy_computing_symbols_support = false,
-
-      -- Smear cursor in insert mode.
-      -- See also `vertical_bar_cursor_insert_mode` and `distance_stop_animating_vertical_bar`.
-      smear_insert_mode = true,
-    },
-  },
-  {
     "linux-cultist/venv-selector.nvim",
     dependencies = {
       "neovim/nvim-lspconfig",
@@ -257,56 +224,6 @@ return {
       }
     end,
   },
-  -- {
-  --   "yetone/avante.nvim",
-  --   event = "VeryLazy",
-  --   version = false, -- set this if you want to always pull the latest change
-  --   opts = {},
-  --   config = function()
-  --     require "configs.avante"
-  --   end,
-  --   -- if you want to build from source then do `make BUILD_FROM_SOURCE=true`
-  --   build = "make",
-  --   -- build = "powershell -ExecutionPolicy Bypass -File Build.ps1 -BuildFromSource false" -- for windows
-  --   dependencies = {
-  --     "nvim-treesitter/nvim-treesitter",
-  --     "stevearc/dressing.nvim",
-  --     "nvim-lua/plenary.nvim",
-  --     "MunifTanjim/nui.nvim",
-  --     --- The below dependencies are optional,
-  --     "echasnovski/mini.pick", -- for file_selector provider mini.pick
-  --     "nvim-telescope/telescope.nvim", -- for file_selector provider telescope
-  --     "hrsh7th/nvim-cmp", -- autocompletion for avante commands and mentions
-  --     "ibhagwan/fzf-lua", -- for file_selector provider fzf
-  --     "nvim-tree/nvim-web-devicons", -- or echasnovski/mini.icons
-  --     "zbirenbaum/copilot.lua", -- for providers='copilot'
-  --     {
-  --       -- support for image pasting
-  --       "HakonHarnes/img-clip.nvim",
-  --       event = "VeryLazy",
-  --       opts = {
-  --         -- recommended settings
-  --         default = {
-  --           embed_image_as_base64 = false,
-  --           prompt_for_file_name = false,
-  --           drag_and_drop = {
-  --             insert_mode = true,
-  --           },
-  --           -- required for Windows users
-  --           use_absolute_path = true,
-  --         },
-  --       },
-  --     },
-  --     {
-  --       -- Make sure to set this up properly if you have lazy=true
-  --       "MeanderingProgrammer/render-markdown.nvim",
-  --       opts = {
-  --         file_types = { "markdown", "Avante" },
-  --       },
-  --       ft = { "markdown", "Avante" },
-  --     },
-  --   },
-  -- },
   {
     "aaronhallaert/advanced-git-search.nvim",
     cmd = { "AdvancedGitSearch" },
