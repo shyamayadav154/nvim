@@ -417,36 +417,15 @@ return {
     event = "VeryLazy",
   },
   {
-      "barrett-ruth/import-cost.nvim",
-      event = "BufRead",
-      init = function()
-          vim.g.import_cost = {
-              package_manager = "yarn",
-              filetypes = {},
-          }
-      end,
-      config = function()
-          vim.api.nvim_create_user_command("ImportCostToggle", function()
-              local ic = require("import-cost")
-              local extmark = require("import-cost.extmark")
-              local bufnr = vim.api.nvim_get_current_buf()
-              local ft = vim.bo.filetype
-
-              if vim.b.import_cost_on then
-                  extmark.clear_extmarks(bufnr)
-                  ic.config.filetypes = vim.tbl_filter(function(f)
-                      return f ~= ft
-                  end, ic.config.filetypes)
-                  vim.b.import_cost_on = false
-              else
-                  if not vim.tbl_contains(ic.config.filetypes, ft) then
-                      table.insert(ic.config.filetypes, ft)
-                  end
-                  ic.attach(bufnr)
-                  vim.b.import_cost_on = true
-              end
-          end, {})
-      end,
+    enabled = false,
+    "barrett-ruth/import-cost.nvim",
+    event = "BufRead",
+    init = function()
+      vim.g.import_cost = {
+        package_manager = "yarn",
+        filetypes = {},
+      }
+    end,
   },
   {
     "tpope/vim-fugitive",
