@@ -289,7 +289,13 @@ return {
     dependencies = {
       "nvim-lua/lsp-status.nvim",
     },
-    opts = {},
+    opts = {
+      notification = {
+        window = {
+          avoid = { "NvimTree" },
+        },
+      },
+    },
   },
   -- {
   --   "typed-rocks/ts-worksheet-neovim",
